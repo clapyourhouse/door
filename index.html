@@ -326,7 +326,7 @@ html, body {
   /* On mobile: chat panel becomes bottom drawer */
   .chat-panel {
     top: auto; right: 0; left: 0; bottom: 0;
-    width: 100%; height: 38dvh;
+    width: 100vw; max-width: 100vw; height: 38dvh; overflow-x: hidden;
     border-left: none;
     border-top: 1px solid rgba(255,255,255,0.1);
     border-radius: 20px 20px 0 0;
@@ -460,10 +460,10 @@ html, body {
 }
 
 .chat-input-wrap {
-  padding: 12px 14px;
+  padding: 12px 10px;
   border-top: 1px solid rgba(255,255,255,0.06);
-  display: flex; gap: 8px; align-items: center;
-  width: 100%; box-sizing: border-box;
+  display: flex; gap: 6px; align-items: center;
+  width: 100%; box-sizing: border-box; overflow: hidden;
 }
 .chat-input {
   flex: 1; min-width: 0; background: rgba(255,255,255,0.06);
@@ -1201,7 +1201,7 @@ html, body {
 
 <script>
 const MAPS_KEY   = 'AIzaSyAtIt7r-FtsdfFWFafDRLNvNIadOVDUjdk';
-const OPENAI_KEY = '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';
+const OPENAI_KEY = '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';
 const SESSION_MINUTES = 30;
 
 const allLocations = [
