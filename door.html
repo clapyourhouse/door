@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Door — 世界の扉</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0a0a0f;
+  color: #fff;
+  height: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* ======= SCREENS ======= */
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease; }
+.screen.hidden { opacity: 0; pointer-events: none; }
+.screen.gone { display: none; }
+
+/* ======= LANDING ======= */
+#s-landing { background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%); z-index: 100; }
+
+.logo { font-size: 13px; letter-spacing: 8px; text-transform: uppercase; color: #666; margin-bottom: 56px; }
+
+.door-wrap { perspective: 1200px; cursor: pointer; margin-bottom: 44px; }
+.door-outer {
+  width: 160px; height: 260px;
+  border: 2px solid #444;
+  border-radius: 80px 80px 0 0;
+  position: relative;
+  transform-style: preserve-3d;
+}
+.door-panel {
+  position: absolute; inset: 0;
+  border-radius: 78px 78px 0 0;
+  background: linear-gradient(160deg, #2a2a3e 0%, #1a1a28 100%);
+  transform-origin: left center;
+  transition: transform 1.2s cubic-bezier(0.4,0,0.2,1);
+  border-right: 1px solid #555;
+}
+.door-panel.open { transform: rotateY(-75deg); }
+.door-panel::before {
+  content: '';
+  position: absolute;
+  left: 18px; right: 18px; top: 36px; bottom: 36px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 54px 54px 4px 4px;
+}
+.door-knob {
+  position: absolute; right: 20px; top: 50%;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e0c87a, #9a7a2a);
+  box-shadow: 0 0 8px rgba(200,160,60,0.5);
+}
+.door-glow {
+  position: absolute; inset: 0;
+  border-radius: 78px 78px 0 0;
+  background: radial-gradient(ellipse at center, rgba(100,180,255,0.12) 0%, transparent 70%);
+  opacity: 0; transition: opacity 1.2s ease;
+}
+.door-glow.show { opacity: 1; }
+
+.open-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #aaa; padding: 13px 38px;
+  border-radius: 40px; font-size: 13px;
+  letter-spacing: 3px; cursor: pointer;
+  transition: all 0.3s; text-transform: uppercase;
+}
+.open-btn:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+
+.host-link {
+  position: absolute; bottom: 36px;
+  font-size: 12px; color: #444; cursor: pointer;
+  letter-spacing: 1px; text-decoration: none;
+  transition: color 0.2s;
+}
+.host-link:hover { color: #888; }
+.host-link span { color: #667eea; }
+
+/* ======= AREA SELECT ======= */
+#s-area {
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+  z-index: 99;
+  gap: 0;
+}
+
+.area-title { font-size: 13px; letter-spacing: 6px; color: #555; text-transform: uppercase; margin-bottom: 10px; }
+.area-sub { font-size: 14px; color: #888; margin-bottom: 48px; }
+
+.area-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 560px;
+  width: 90%;
+  margin-bottom: 32px;
+}
+
+.area-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 20px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+}
+.area-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+.area-card.selected { border-color: #667eea; background: rgba(102,126,234,0.12); }
+.area-card.locked { opacity: 0.5; cursor: default; }
+.area-card .emoji { font-size: 28px; margin-bottom: 10px; }
+.area-card .label { font-size: 12px; color: #bbb; }
+.area-card .sublabel { font-size: 10px; color: #555; margin-top: 4px; }
+
+.lock-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 10px; background: rgba(102,126,234,0.2);
+  color: #667eea; border-radius: 4px; padding: 2px 6px;
+  letter-spacing: 1px;
+}
+
+.area-cta {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none; color: #fff;
+  padding: 14px 48px; border-radius: 40px;
+  font-size: 14px; letter-spacing: 2px;
+  cursor: pointer; transition: all 0.3s;
+  text-transform: uppercase;
+}
+.area-cta:hover { box-shadow: 0 0 24px rgba(102,126,234,0.5); transform: translateY(-1px); }
+
+/* ======= MAIN APP ======= */
+#s-app { display: none; flex-direction: column; z-index: 10; }
+#s-app.visible { display: flex; }
+
+.topbar {
+  height: 52px;
+  background: rgba(10,10,15,0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 14px;
+  flex-shrink: 0; position: relative; z-index: 20;
+}
+.topbar-logo { font-size: 12px; letter-spacing: 5px; color: #555; text-transform: uppercase; }
+.location-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 13px; color: #ccc;
+}
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4ade80; box-shadow: 0 0 6px #4ade80;
+  animation: pulse 2s infinite; margin-left: auto;
+}
+.timer-badge {
+  font-size: 12px; font-family: monospace;
+  color: #aaa; letter-spacing: 1px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 5px 14px;
+  transition: color 0.3s, border-color 0.3s;
+}
+.timer-badge.warn { color: #f87171; border-color: rgba(248,113,113,0.4); }
+
+.session-end-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.session-end-card {
+  background: #13131f;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 40px;
+  text-align: center; max-width: 360px; width: 90%;
+}
+.session-end-card h2 { font-size: 22px; margin-bottom: 10px; }
+.session-end-card p { font-size: 14px; color: #666; margin-bottom: 28px; line-height: 1.6; }
+.session-end-btns { display: flex; flex-direction: column; gap: 10px; }
+.btn-premium {
+  padding: 14px; border-radius: 12px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  border: none; color: #fff; font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: all 0.3s;
+}
+.btn-premium:hover { box-shadow: 0 0 20px rgba(102,126,234,0.4); }
+.btn-next {
+  padding: 12px; border-radius: 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #777; font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-next:hover { border-color: rgba(255,255,255,0.25); color: #aaa; }
+
+.topbar-host-btn {
+  background: rgba(102,126,234,0.15);
+  border: 1px solid rgba(102,126,234,0.3);
+  color: #667eea; padding: 6px 16px;
+  border-radius: 20px; font-size: 12px;
+  cursor: pointer; letter-spacing: 1px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.topbar-host-btn:hover { background: rgba(102,126,234,0.25); }
+
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+.main-content { flex: 1; display: flex; overflow: hidden; }
+
+/* Street View */
+.sv-side { flex: 1; position: relative; background: #000; }
+#sv-iframe { width: 100%; height: 100%; border: none; display: block; }
+
+.sv-loading {
+  position: absolute; inset: 0;
+  background: #0a0a14;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  transition: opacity 0.5s;
+}
+.sv-loading.hidden { opacity: 0; pointer-events: none; }
+.sv-spinner {
+  width: 36px; height: 36px;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: #667eea;
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.sv-loading p { font-size: 12px; color: #444; letter-spacing: 2px; }
+
+.sv-overlay {
+  position: absolute; bottom: 24px; left: 24px;
+  background: rgba(10,10,15,0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 16px 20px;
+  backdrop-filter: blur(12px); z-index: 10; min-width: 200px;
+}
+.sv-overlay .country { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.sv-overlay .coords { font-size: 11px; color: #555; font-family: monospace; }
+.sv-overlay .local-time { font-size: 11px; color: #666; margin-top: 5px; }
+
+/* ======= FULLSCREEN APP LAYOUT ======= */
+.hud-top {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+}
+.hud-left { display: flex; align-items: center; gap: 8px; }
+.hud-center { flex: 1; text-align: center; }
+.hud-logo { font-size: 11px; letter-spacing: 6px; color: rgba(255,255,255,0.3); }
+.hud-right { display: flex; align-items: center; gap: 8px; }
+
+.hud-btn {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #aaa; padding: 6px 14px; border-radius: 20px;
+  font-size: 11px; cursor: pointer; white-space: nowrap;
+  transition: all 0.2s; backdrop-filter: blur(8px);
+}
+.hud-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+.hud-btn-primary {
+  background: rgba(102,126,234,0.3);
+  border-color: rgba(102,126,234,0.5); color: #a0b0ff;
+}
+.hud-btn-primary:hover { background: rgba(102,126,234,0.5); color: #fff; }
+
+/* Chat panel — right side float */
+.chat-panel {
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: 20;
+  width: 320px;
+  background: rgba(10,10,18,0.92);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.chat-panel.collapsed { transform: translateX(100%); }
+
+.chat-panel-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+  padding-top: 56px; /* clear top HUD */
+}
+.chat-toggle-btn {
+  background: transparent; border: none; color: #444;
+  font-size: 16px; cursor: pointer; margin-left: auto;
+  transition: color 0.2s; line-height: 1;
+}
+.chat-toggle-btn:hover { color: #888; }
+
+.chat-open-btn {
+  position: absolute; bottom: 24px; right: 24px; z-index: 20;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(102,126,234,0.9);
+  border: none; cursor: pointer; font-size: 22px;
+  box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+  transition: transform 0.2s;
+}
+.chat-open-btn:hover { transform: scale(1.08); }
+.chat-open-btn.hidden { display: none; }
+
+/* override sv-overlay position */
+.sv-overlay { bottom: 24px; left: 24px; z-index: 10; }
+
+/* ======= MOBILE DRAWER ======= */
+@media (max-width: 640px) {
+  * { max-width: 100%; box-sizing: border-box; }
+  .hud-top { padding: 10px 12px; overflow: hidden; flex-wrap: wrap; }
+  .hud-logo { display: none; }
+  .hud-right { gap: 6px; }
+  .hud-btn { font-size: 10px; padding: 5px 10px; }
+  .timer-badge { font-size: 11px; padding: 4px 10px; }
+
+  /* On mobile: chat panel becomes bottom drawer */
+  .chat-panel {
+    top: auto; right: 0; left: 0; bottom: 0;
+    width: 100%; height: 38dvh;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px 20px 0 0;
+    transform: translateY(calc(100% - 56px));
+  }
+  .chat-panel.open { transform: translateY(0); }
+
+  /* キーボード表示時：入力欄を固定 */
+  .chat-input-wrap {
+    position: sticky;
+    bottom: 0;
+    background: #0d0d14;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .chat-panel-header {
+    padding: 8px 16px 12px;
+    cursor: pointer;
+    position: relative;
+  }
+  .chat-panel-header::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.2);
+    margin: 0 auto 10px;
+  }
+  .chat-toggle-btn { display: none; }
+  .chat-open-btn { display: none; }
+
+  .sv-overlay { bottom: 88px; left: 12px; padding: 10px 14px; min-width: 150px; }
+  .sv-overlay .country { font-size: 14px; }
+  .next-door-btn { font-size: 11px; padding: 6px 12px; }
+  .area-filter-btn { font-size: 11px; padding: 5px 10px; }
+}
+
+.next-door-wrap {
+  position: absolute; top: 16px; left: 16px; z-index: 10;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.next-door-btn {
+  background: rgba(10,10,15,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #aaa; padding: 8px 16px; border-radius: 20px;
+  font-size: 12px; letter-spacing: 2px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.3s;
+  backdrop-filter: blur(8px); white-space: nowrap;
+}
+.next-door-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+.area-filter { position: relative; }
+.area-filter-btn {
+  background: rgba(10,10,15,0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #777; padding: 7px 14px; border-radius: 20px;
+  font-size: 12px; cursor: pointer;
+  backdrop-filter: blur(8px); transition: all 0.2s;
+  white-space: nowrap;
+}
+.area-filter-btn:hover { color: #aaa; border-color: rgba(255,255,255,0.2); }
+.area-filter-menu {
+  position: absolute; top: calc(100% + 8px); left: 0;
+  background: rgba(13,13,20,0.97);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; overflow: hidden;
+  min-width: 180px; backdrop-filter: blur(12px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.area-filter-menu.hidden { opacity: 0; pointer-events: none; transform: translateY(-4px); }
+.area-filter-item {
+  padding: 11px 16px; font-size: 13px; color: #bbb;
+  cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.area-filter-item:hover { background: rgba(255,255,255,0.06); }
+.area-filter-item.active { color: #fff; background: rgba(102,126,234,0.1); }
+.area-filter-item.locked { color: #555; cursor: default; }
+.area-filter-item.locked:hover { background: transparent; }
+.free-tag { font-size: 10px; color: #4ade80; background: rgba(74,222,128,0.1); border-radius: 4px; padding: 1px 6px; }
+.pro-tag { font-size: 10px; color: #667eea; background: rgba(102,126,234,0.15); border-radius: 4px; padding: 1px 6px; }
+
+/* Chat */
+.chat-side {
+  width: 320px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column;
+  background: #0d0d14; flex-shrink: 0;
+}
+.chat-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 10px;
+}
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.chat-name { font-size: 14px; font-weight: 600; }
+.chat-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+.messages {
+  flex: 1; overflow-y: auto;
+  padding: 18px 14px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.messages::-webkit-scrollbar { width: 3px; }
+.messages::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+.msg { display: flex; gap: 8px; align-items: flex-end; }
+.msg.me { flex-direction: row-reverse; }
+.msg-bubble {
+  max-width: 210px; padding: 10px 13px;
+  border-radius: 16px; font-size: 13px; line-height: 1.5;
+}
+.msg:not(.me) .msg-bubble {
+  background: rgba(255,255,255,0.07);
+  border-radius: 4px 16px 16px 16px; color: #ddd;
+}
+.msg.me .msg-bubble {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 16px 4px 16px 16px; color: #fff;
+}
+.msg-time { font-size: 10px; color: #3a3a3a; margin-bottom: 2px; flex-shrink: 0; }
+.translated { font-size: 11px; color: #555; margin-top: 5px; font-style: italic; }
+.ai-badge {
+  font-size: 9px; background: rgba(102,126,234,0.15);
+  color: #667eea; border-radius: 3px; padding: 1px 4px;
+  vertical-align: middle; margin-left: 3px;
+}
+
+.chat-input-wrap {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; gap: 8px; align-items: center;
+  width: 100%; box-sizing: border-box;
+}
+.chat-input {
+  flex: 1; min-width: 0; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 9px 14px;
+  color: #fff; font-size: 13px; outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: rgba(102,126,234,0.4); }
+.chat-input::placeholder { color: #333; }
+.send-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s;
+}
+.send-btn:hover { transform: scale(1.08); }
+.send-btn svg { width: 14px; height: 14px; fill: #fff; }
+
+.mic-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.mic-btn:hover { background: rgba(255,255,255,0.12); }
+.mic-btn.recording {
+  background: rgba(248,113,113,0.2);
+  border-color: rgba(248,113,113,0.6);
+  animation: micPulse 1s infinite;
+}
+.mic-btn svg { width: 14px; height: 14px; fill: #888; }
+.mic-btn.recording svg { fill: #f87171; }
+@keyframes micPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(248,113,113,0); }
+}
+
+.speak-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; color: #555; background: transparent;
+  border: none; cursor: pointer; padding: 2px 0; margin-top: 5px;
+  transition: color 0.2s;
+}
+.speak-btn:hover { color: #888; }
+.speak-btn.speaking { color: #667eea; }
+.speak-btn svg { width: 11px; height: 11px; fill: currentColor; }
+
+.typing-indicator { display: flex; align-items: center; gap: 4px; padding: 4px 6px; }
+.typing-indicator span {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #444; animation: typing 1.2s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%,60%,100%{transform:translateY(0);background:#444}
+  30%{transform:translateY(-4px);background:#777}
+}
+
+/* ======= HOST REGISTRATION ======= */
+#s-host {
+  background: #0a0a0f;
+  z-index: 200;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.host-header {
+  height: 56px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 16px;
+}
+.back-btn {
+  background: transparent; border: none;
+  color: #555; cursor: pointer; font-size: 13px;
+  letter-spacing: 1px; transition: color 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.back-btn:hover { color: #aaa; }
+.host-header-logo { font-size: 12px; letter-spacing: 5px; color: #444; text-transform: uppercase; }
+
+.host-body {
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 28px 80px;
+}
+
+.host-hero { margin-bottom: 48px; }
+.host-hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+.host-hero p { font-size: 15px; color: #666; line-height: 1.6; }
+
+.earnings-bar {
+  display: flex; gap: 16px; margin-top: 28px;
+}
+.earn-card {
+  flex: 1; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 18px;
+}
+.earn-card .amount { font-size: 22px; font-weight: 700; color: #4ade80; }
+.earn-card .desc { font-size: 12px; color: #555; margin-top: 4px; }
+
+.form-section { margin-bottom: 36px; }
+.form-section h2 {
+  font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+  color: #555; margin-bottom: 20px; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.form-row { display: flex; gap: 14px; margin-bottom: 14px; }
+.form-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; color: #666; letter-spacing: 1px; }
+.form-group input, .form-group select, .form-group textarea {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 11px 14px;
+  color: #fff; font-size: 13px; outline: none;
+  transition: border-color 0.2s; font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: rgba(102,126,234,0.5);
+}
+.form-group input::placeholder, .form-group textarea::placeholder { color: #333; }
+.form-group select option { background: #1a1a28; }
+.form-group textarea { resize: none; height: 80px; }
+
+.tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag {
+  padding: 7px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; font-size: 12px; color: #777;
+  cursor: pointer; transition: all 0.2s;
+}
+.tag:hover { border-color: rgba(255,255,255,0.25); color: #bbb; }
+.tag.selected { border-color: #667eea; color: #667eea; background: rgba(102,126,234,0.1); }
+
+.plan-cards { display: flex; gap: 14px; }
+.plan-card {
+  flex: 1; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 20px;
+  cursor: pointer; transition: all 0.25s; position: relative;
+}
+.plan-card:hover { border-color: rgba(255,255,255,0.2); }
+.plan-card.selected { border-color: #667eea; background: rgba(102,126,234,0.08); }
+.plan-card .plan-name { font-size: 13px; color: #888; margin-bottom: 10px; }
+.plan-card .plan-price { font-size: 22px; font-weight: 700; }
+.plan-card .plan-price span { font-size: 13px; color: #555; font-weight: 400; }
+.plan-card .plan-features { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.plan-card .plan-features li {
+  font-size: 12px; color: #666; list-style: none;
+  padding-left: 14px; position: relative;
+}
+.plan-card .plan-features li::before {
+  content: '✓'; position: absolute; left: 0;
+  color: #4ade80; font-size: 10px;
+}
+.plan-card.selected .plan-features li { color: #888; }
+.plan-badge {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  font-size: 10px; padding: 3px 10px; border-radius: 10px;
+  white-space: nowrap; letter-spacing: 1px;
+}
+
+.avail-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.avail-chip {
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; font-size: 12px; color: #666;
+  cursor: pointer; transition: all 0.2s;
+}
+.avail-chip:hover { border-color: rgba(255,255,255,0.2); color: #aaa; }
+.avail-chip.selected { border-color: #667eea; color: #667eea; background: rgba(102,126,234,0.08); }
+
+.submit-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none; border-radius: 14px;
+  color: #fff; font-size: 15px; font-weight: 600;
+  cursor: pointer; letter-spacing: 1px;
+  transition: all 0.3s; margin-top: 8px;
+}
+.submit-btn:hover { box-shadow: 0 0 28px rgba(102,126,234,0.4); transform: translateY(-1px); }
+
+.terms-note { font-size: 11px; color: #3a3a3a; text-align: center; margin-top: 14px; }
+.terms-note a { color: #555; text-decoration: none; }
+
+/* ======= HOST BROWSER ======= */
+#s-hosts {
+  background: #0a0a0f;
+  z-index: 150;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.hosts-header {
+  height: 56px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 16px;
+  background: rgba(10,10,15,0.98);
+  position: sticky; top: 0; z-index: 10;
+  backdrop-filter: blur(10px);
+}
+.hosts-header-logo { font-size: 12px; letter-spacing: 5px; color: #444; text-transform: uppercase; }
+
+.area-tabs {
+  display: flex; gap: 6px; margin-left: auto;
+}
+.area-tab {
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; color: #555;
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.area-tab:hover { color: #aaa; border-color: rgba(255,255,255,0.15); }
+.area-tab.active { color: #fff; border-color: rgba(102,126,234,0.5); background: rgba(102,126,234,0.1); }
+
+.hosts-body { max-width: 900px; width: 100%; margin: 0 auto; padding: 36px 24px 80px; }
+.hosts-body h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.hosts-body .hosts-sub { font-size: 14px; color: #555; margin-bottom: 32px; }
+
+.hosts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.host-card {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: #0d0d18;
+  cursor: pointer;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  position: relative;
+}
+.host-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(102,126,234,0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.host-card-img {
+  width: 100%; height: 160px;
+  object-fit: cover; display: block;
+  background: #0a0a14;
+  position: relative;
+}
+.host-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.host-card-img .img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(10,10,18,0.9) 100%);
+}
+
+.online-dot {
+  position: absolute; top: 12px; right: 12px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4ade80; box-shadow: 0 0 8px #4ade80;
+  animation: pulse 2s infinite;
+}
+.offline-dot {
+  position: absolute; top: 12px; right: 12px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #555;
+}
+
+.host-card-body { padding: 16px; }
+.host-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.host-avatar-sm {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.host-card-name { font-size: 15px; font-weight: 600; }
+.host-card-loc { font-size: 11px; color: #555; margin-top: 1px; }
+.host-card-bio { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 12px; }
+
+.host-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+.host-tag {
+  font-size: 10px; padding: 3px 9px;
+  border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);
+  color: #666;
+}
+
+.open-door-btn {
+  width: 100%; padding: 11px;
+  background: transparent;
+  border: 1px solid rgba(102,126,234,0.3);
+  border-radius: 10px; color: #667eea;
+  font-size: 13px; cursor: pointer;
+  transition: all 0.2s; font-weight: 500;
+}
+.open-door-btn:hover {
+  background: rgba(102,126,234,0.1);
+  border-color: rgba(102,126,234,0.6);
+}
+.host-card:hover .open-door-btn {
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  border-color: transparent; color: #fff;
+}
+
+/* ======= UPGRADE MODAL ======= */
+.upgrade-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0.88);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+.upgrade-modal {
+  background: #0f0f1c;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  width: 92%; max-width: 480px;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.upgrade-hero {
+  background: linear-gradient(135deg, #1a1a3e 0%, #0f0f1c 100%);
+  padding: 36px 32px 28px;
+  position: relative;
+}
+.upgrade-close {
+  position: absolute; top: 16px; right: 18px;
+  background: transparent; border: none;
+  color: #444; font-size: 20px; cursor: pointer; line-height: 1;
+  transition: color 0.2s;
+}
+.upgrade-close:hover { color: #888; }
+
+.upgrade-tag {
+  display: inline-block;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: #667eea; border: 1px solid rgba(102,126,234,0.3);
+  border-radius: 20px; padding: 4px 12px; margin-bottom: 16px;
+}
+.upgrade-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+.upgrade-hero p { font-size: 13px; color: #666; line-height: 1.6; }
+
+.use-cases {
+  display: flex; flex-direction: column; gap: 10px; margin-top: 20px;
+}
+.use-case {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: #888;
+}
+.use-case .uc-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+
+.upgrade-plans {
+  padding: 24px 32px 32px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.upgrade-plans h3 { font-size: 12px; letter-spacing: 2px; color: #444; text-transform: uppercase; margin-bottom: 4px; }
+
+.up-plan {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 18px 20px;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 16px;
+  position: relative;
+}
+.up-plan:hover { border-color: rgba(102,126,234,0.4); background: rgba(102,126,234,0.05); }
+.up-plan.featured {
+  border-color: #667eea;
+  background: rgba(102,126,234,0.08);
+}
+.up-plan .plan-info { flex: 1; }
+.up-plan .plan-label { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.up-plan .plan-desc { font-size: 12px; color: #555; }
+.up-plan .plan-price-tag { text-align: right; }
+.up-plan .plan-price-tag .price { font-size: 20px; font-weight: 700; }
+.up-plan .plan-price-tag .per { font-size: 11px; color: #555; }
+.up-plan .badge-best {
+  position: absolute; top: -10px; right: 16px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  font-size: 10px; padding: 3px 10px; border-radius: 10px; letter-spacing: 1px;
+}
+
+.upgrade-cta {
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s; letter-spacing: 1px;
+  margin-top: 4px;
+}
+.upgrade-cta:hover { box-shadow: 0 0 24px rgba(102,126,234,0.4); }
+.upgrade-note { font-size: 11px; color: #333; text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ===== SCREEN 1: LANDING ===== -->
+<div class="screen" id="s-landing">
+  <div class="logo">Door</div>
+  <div class="door-wrap" id="doorWrap">
+    <div class="door-outer">
+      <div class="door-panel" id="doorPanel">
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-glow" id="doorGlow"></div>
+    </div>
+  </div>
+  <button class="open-btn" onclick="openDoorAndLaunch()">扉を開く</button>
+  <a class="host-link" onclick="goToHost()">あなたの街の扉を開放する — <span>ホスト登録</span></a>
+</div>
+
+<!-- ===== SCREEN 2: AREA SELECT ===== -->
+<div class="screen hidden" id="s-area">
+  <div class="area-title">Door</div>
+  <p class="area-sub">どのエリアの扉を開きますか？</p>
+
+  <div class="area-grid">
+    <div class="area-card selected" onclick="selectArea(this,'random')" data-area="random">
+      <div class="emoji">🌍</div>
+      <div class="label">完全ランダム</div>
+      <div class="sublabel">無料</div>
+    </div>
+    <div class="area-card locked" onclick="showUpgrade()" data-area="asia">
+      <div class="lock-badge">PRO</div>
+      <div class="emoji">🌏</div>
+      <div class="label">アジア</div>
+      <div class="sublabel">東アジア・東南アジア</div>
+    </div>
+    <div class="area-card locked" onclick="showUpgrade()" data-area="europe">
+      <div class="lock-badge">PRO</div>
+      <div class="emoji">🗼</div>
+      <div class="label">ヨーロッパ</div>
+      <div class="sublabel">西欧・東欧・北欧</div>
+    </div>
+    <div class="area-card locked" onclick="showUpgrade()" data-area="americas">
+      <div class="lock-badge">PRO</div>
+      <div class="emoji">🗽</div>
+      <div class="label">アメリカ大陸</div>
+      <div class="sublabel">北米・中南米</div>
+    </div>
+    <div class="area-card locked" onclick="showUpgrade()" data-area="middleeast">
+      <div class="lock-badge">PRO</div>
+      <div class="emoji">🕌</div>
+      <div class="label">中東・アフリカ</div>
+      <div class="sublabel">レアな出会い</div>
+    </div>
+    <div class="area-card locked" onclick="showUpgrade()" data-area="oceania">
+      <div class="lock-badge">PRO</div>
+      <div class="emoji">🦘</div>
+      <div class="label">オセアニア</div>
+      <div class="sublabel">オーストラリア・NZ</div>
+    </div>
+  </div>
+
+  <button class="area-cta" onclick="launchApp()">この扉を開く →</button>
+</div>
+
+<!-- ===== SCREEN 3: MAIN APP ===== -->
+<div class="screen gone" id="s-app" style="position:fixed;inset:0;display:none;flex-direction:column;">
+
+  <!-- Street View fullscreen -->
+  <iframe id="sv-iframe" style="position:absolute;inset:0;width:100%;height:100%;border:none;z-index:0;" allowfullscreen></iframe>
+
+  <!-- Loading -->
+  <div class="sv-loading" id="svLoading" style="z-index:5;">
+    <div class="sv-spinner"></div>
+    <p>扉の向こうを覗いています...</p>
+  </div>
+
+  <!-- Top HUD -->
+  <div class="hud-top">
+    <div class="hud-left">
+      <button class="next-door-btn" onclick="nextDoor()">次の扉 →</button>
+      <div class="area-filter">
+        <div class="area-filter-btn" onclick="toggleFilter()" id="filterBtn">🌍 ランダム ▾</div>
+        <div class="area-filter-menu hidden" id="filterMenu">
+          <div class="area-filter-item active" onclick="setArea('random',this)">🌍 完全ランダム <span class="free-tag">無料</span></div>
+          <div class="area-filter-item locked" onclick="showUpgrade('asia')">🌏 アジア <span class="pro-tag">PRO</span></div>
+          <div class="area-filter-item locked" onclick="showUpgrade('europe')">🗼 ヨーロッパ <span class="pro-tag">PRO</span></div>
+          <div class="area-filter-item locked" onclick="showUpgrade('americas')">🗽 アメリカ大陸 <span class="pro-tag">PRO</span></div>
+          <div class="area-filter-item locked" onclick="showUpgrade('middleeast')">🕌 中東・アフリカ <span class="pro-tag">PRO</span></div>
+          <div class="area-filter-item locked" onclick="showUpgrade('oceania')">🦘 オセアニア <span class="pro-tag">PRO</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hud-center">
+      <span class="hud-logo">DOOR</span>
+    </div>
+    <div class="hud-right">
+      <div class="timer-badge" id="timerBadge">⏱ 30:00</div>
+      <button class="hud-btn" onclick="goToHosts()">ホストを選ぶ</button>
+      <button class="hud-btn hud-btn-primary" onclick="goToHost()">ホストになる</button>
+    </div>
+  </div>
+
+  <!-- Bottom location badge -->
+  <div class="sv-overlay">
+    <div class="country" id="overlayCountry">---</div>
+    <div class="coords" id="overlayCoords">--</div>
+    <div class="local-time" id="overlayTime">現地時刻: --:--</div>
+  </div>
+
+  <!-- Chat panel (right side on desktop, drawer on mobile) -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-panel-header">
+      <div class="avatar" id="chatAvatar">🌍</div>
+      <div style="flex:1;min-width:0;">
+        <div class="chat-name" id="chatName">マッチング中...</div>
+        <div class="chat-sub" id="chatSub">接続しています</div>
+      </div>
+      <button class="chat-toggle-btn" onclick="toggleChat()" id="chatToggleBtn">✕</button>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="chat-input-wrap">
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 16.93A7.001 7.001 0 0 1 5 11H3a9.001 9.001 0 0 0 8 8.94V22h2v-2.06A9.001 9.001 0 0 0 21 11h-2a7.001 7.001 0 0 1-6 6.93z"/></svg>
+      </button>
+      <input class="chat-input" id="chatInput" placeholder="メッセージを送る..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+      <button class="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat open button (when panel is collapsed) -->
+  <button class="chat-open-btn hidden" id="chatOpenBtn" onclick="toggleChat()">
+    <span id="chatOpenAvatar">💬</span>
+  </button>
+
+</div>
+
+<!-- ===== SCREEN 4: HOST REGISTRATION ===== -->
+<div class="screen gone" id="s-host" style="position:fixed;inset:0;overflow-y:auto;display:none;flex-direction:column;">
+  <div class="host-header">
+    <button class="back-btn" onclick="goBack()">← 戻る</button>
+    <span class="host-header-logo">Door Host</span>
+  </div>
+  <div class="host-body">
+
+    <div class="host-hero">
+      <h1>あなたの街の扉を開こう</h1>
+      <p>世界中の人があなたの場所に"飛んで"くる。あなたはガイドとして迎え、会話を楽しみながら収益を得られます。</p>
+      <div class="earnings-bar">
+        <div class="earn-card">
+          <div class="amount">¥300〜500</div>
+          <div class="desc">1セッションあたりの報酬</div>
+        </div>
+        <div class="earn-card">
+          <div class="amount">¥15,000+</div>
+          <div class="desc">月30セッションで想定収益</div>
+        </div>
+        <div class="earn-card">
+          <div class="amount">70%</div>
+          <div class="desc">ホストへの還元率</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAN -->
+    <div class="form-section">
+      <h2>プランを選ぶ</h2>
+      <div class="plan-cards">
+        <div class="plan-card selected" onclick="selectPlan(this)">
+          <div class="plan-name">ベーシック</div>
+          <div class="plan-price">¥980 <span>/ 月</span></div>
+          <ul class="plan-features">
+            <li>月20セッションまで</li>
+            <li>テキストチャット</li>
+            <li>プロフィール掲載</li>
+            <li>報酬受取り</li>
+          </ul>
+        </div>
+        <div class="plan-card" onclick="selectPlan(this)" style="position:relative;">
+          <div class="plan-badge">おすすめ</div>
+          <div class="plan-name">プロ</div>
+          <div class="plan-price">¥1,980 <span>/ 月</span></div>
+          <ul class="plan-features">
+            <li>無制限セッション</li>
+            <li>音声・ビデオ対応</li>
+            <li>優先マッチング</li>
+            <li>収益ダッシュボード</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="form-section">
+      <h2>プロフィール</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>名前（表示名）</label>
+          <input type="text" placeholder="例：Hana">
+        </div>
+        <div class="form-group">
+          <label>都市・地域</label>
+          <input type="text" placeholder="例：東京・渋谷">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>使える言語</label>
+          <input type="text" placeholder="例：日本語、英語">
+        </div>
+        <div class="form-group">
+          <label>職業・バックグラウンド</label>
+          <input type="text" placeholder="例：フォトグラファー">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>自己紹介（相手に表示されます）</label>
+        <textarea placeholder="例：渋谷在住10年。隠れた名店や撮影スポットを紹介します。旅行前の下調べに最適です！"></textarea>
+      </div>
+    </div>
+
+    <!-- TOPICS -->
+    <div class="form-section">
+      <h2>得意なトピック</h2>
+      <div class="tag-group">
+        <div class="tag selected" onclick="this.classList.toggle('selected')">🗺 観光案内</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">🍜 グルメ・食文化</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">💬 語学練習</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">📸 フォトスポット</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">🎌 文化・歴史</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">🏙 ローカルライフ</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">🎵 音楽・アート</div>
+        <div class="tag" onclick="this.classList.toggle('selected')">🏄 アウトドア</div>
+      </div>
+    </div>
+
+    <!-- AVAILABILITY -->
+    <div class="form-section">
+      <h2>オンライン時間帯</h2>
+      <div class="avail-grid">
+        <div class="avail-chip selected" onclick="this.classList.toggle('selected')">平日 朝</div>
+        <div class="avail-chip" onclick="this.classList.toggle('selected')">平日 昼</div>
+        <div class="avail-chip selected" onclick="this.classList.toggle('selected')">平日 夜</div>
+        <div class="avail-chip" onclick="this.classList.toggle('selected')">土日 朝</div>
+        <div class="avail-chip selected" onclick="this.classList.toggle('selected')">土日 昼</div>
+        <div class="avail-chip selected" onclick="this.classList.toggle('selected')">土日 夜</div>
+        <div class="avail-chip" onclick="this.classList.toggle('selected')">不定期</div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitHost()">ホスト登録を申請する</button>
+    <p class="terms-note">登録後、審査（1〜2営業日）が完了するとホストとして掲載されます。<br><a href="#">利用規約</a> および <a href="#">ホストガイドライン</a> に同意の上でお申し込みください。</p>
+
+  </div>
+</div>
+
+<!-- ===== SCREEN 5: HOST BROWSER ===== -->
+<div class="screen gone" id="s-hosts" style="position:fixed;inset:0;overflow-y:auto;display:none;flex-direction:column;">
+  <div class="hosts-header">
+    <button class="back-btn" onclick="goBack()">← 戻る</button>
+    <span class="hosts-header-logo">Door</span>
+    <div class="area-tabs" id="areaTabs">
+      <div class="area-tab active" onclick="filterHosts('all',this)">すべて</div>
+      <div class="area-tab" onclick="filterHosts('asia',this)">🌏 アジア</div>
+      <div class="area-tab" onclick="filterHosts('europe',this)">🗼 ヨーロッパ</div>
+      <div class="area-tab" onclick="filterHosts('americas',this)">🗽 アメリカ</div>
+    </div>
+  </div>
+  <div class="hosts-body">
+    <h1>扉を選ぶ</h1>
+    <p class="hosts-sub">場所から選ぼう。その街に住む人が迎えてくれます。</p>
+    <div class="hosts-grid" id="hostsGrid"></div>
+  </div>
+</div>
+
+<!-- ===== UPGRADE MODAL ===== -->
+<div class="upgrade-overlay" id="upgradeOverlay" style="display:none;">
+  <div class="upgrade-modal">
+    <div class="upgrade-hero">
+      <button class="upgrade-close" onclick="closeUpgrade()">×</button>
+      <div class="upgrade-tag">Door PRO</div>
+      <h2>行きたい場所の扉を<br>自分で選ぼう</h2>
+      <p>エリアを指定すれば、そこに住む人と確実に繋がれます。</p>
+      <div class="use-cases">
+        <div class="use-case">
+          <div class="uc-icon">✈️</div>
+          <span>「来月ソウルに行く — 先に韓国人と話して街を知りたい」</span>
+        </div>
+        <div class="use-case">
+          <div class="uc-icon">💬</div>
+          <span>「スペイン語の練習相手が欲しい」</span>
+        </div>
+        <div class="use-case">
+          <div class="uc-icon">🌮</div>
+          <span>「メキシコの本場グルメを地元民に聞きたい」</span>
+        </div>
+      </div>
+    </div>
+    <div class="upgrade-plans">
+      <h3>プランを選ぶ</h3>
+      <div class="up-plan featured" id="planMonthly" onclick="selectPlanType('monthly')">
+        <div class="badge-best">おすすめ</div>
+        <div class="plan-info">
+          <div class="plan-label">月額プラン</div>
+          <div class="plan-desc">エリア指定し放題 · 無制限セッション</div>
+        </div>
+        <div class="plan-price-tag">
+          <div class="price">¥500</div>
+          <div class="per">/ 月</div>
+        </div>
+      </div>
+      <div class="up-plan" id="planOnce" onclick="selectPlanType('once')">
+        <div class="plan-info">
+          <div class="plan-label">都度払い</div>
+          <div class="plan-desc">1セッション · エリア1回指定</div>
+        </div>
+        <div class="plan-price-tag">
+          <div class="price">¥300</div>
+          <div class="per">/ 回</div>
+        </div>
+      </div>
+      <button class="upgrade-cta" onclick="completeUpgrade()">プランを始める →</button>
+      <button class="upgrade-cta" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:#777;margin-top:0;" onclick="closeUpgrade();goToHosts()">まずホスト一覧を見る</button>
+      <p class="upgrade-note">いつでもキャンセル可能 · 初月無料</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const MAPS_KEY   = 'AIzaSyAtIt7r-FtsdfFWFafDRLNvNIadOVDUjdk';
+const OPENAI_KEY = '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';
+const SESSION_MINUTES = 30;
+
+const allLocations = [
+  { lat:48.8566,  lng:2.3522,   area:'europe',   country:"フランス・パリ",          flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:60,  pitch:5,
+    intro:"Bonjour! I'm in Paris — just had my morning café. Are you traveling? 🥐",
+    introJa:"こんにちは！今パリで朝のカフェを飲んでたところです。旅行中ですか？" },
+  { lat:-33.8688, lng:151.2093, area:'oceania',  country:"オーストラリア・シドニー", flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:180, pitch:0,
+    intro:"Hey! Sydney here — just finished a surf at Bondi Beach. Wild waves today 🏄",
+    introJa:"やあ！ボンダイビーチでサーフィンしてきたとこ。今日は波がすごかった！" },
+  { lat:35.6762,  lng:139.6503, area:'asia',     country:"日本・東京",              flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:90,  pitch:5,
+    intro:"こんにちは！東京から繋いでます。渋谷でお茶してます☕ どこにいるの？",
+    introJa:null },
+  { lat:-23.5505, lng:-46.6333, area:'americas', country:"ブラジル・サンパウロ",    flag:"🇧🇷", tz:-3,  name:"Gabriel", avatar:"🇧🇷", heading:270, pitch:5,
+    intro:"Oi! Aqui é São Paulo. Você fala português? 😄",
+    introJa:"こんにちは！サンパウロです。ポルトガル語しゃべれる？" },
+  { lat:51.5074,  lng:-0.1278,  area:'europe',   country:"イギリス・ロンドン",      flag:"🇬🇧", tz:0,   name:"Oliver",  avatar:"🇬🇧", heading:130, pitch:5,
+    intro:"Hello from London! It's raining, obviously 🌧️ Having tea. What time is it there?",
+    introJa:"ロンドンからこんにちは！もちろん雨ですよ。紅茶飲んでます。そっちは何時？" },
+  { lat:28.6139,  lng:77.2090,  area:'asia',     country:"インド・デリー",          flag:"🇮🇳", tz:5.5, name:"Priya",   avatar:"🇮🇳", heading:45,  pitch:5,
+    intro:"Namaste from Delhi! 🙏 It's quite hot here. Have you ever been to India?",
+    introJa:"デリーからナマステ！今日はかなり暑いです。インドに来たことありますか？" },
+  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",  flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
+    intro:"NYC checking in 🗽 Just grabbed a bagel. What's Door like where you are?",
+    introJa:"NYCからこんにちは！ベーグル買ってきた。そっちのDoorはどう？" },
+  { lat:41.9028,  lng:12.4964,  area:'europe',   country:"イタリア・ローマ",        flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:310, pitch:5,
+    intro:"Ciao from Rome! 🍕 Near the Colosseum. Tourists everywhere today haha",
+    introJa:"ローマからチャオ！コロッセオの近くにいます。観光客だらけ（笑）" },
+  { lat:37.5665,  lng:126.9780, area:'asia',     country:"韓国・ソウル",            flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:150, pitch:0,
+    intro:"안녕하세요! Seoul here — just came from a café in Hongdae 🧋",
+    introJa:"ソウルからアンニョン！弘大のカフェから戻ってきたとこです。" },
+  { lat:25.2048,  lng:55.2708,  area:'middleeast',country:"UAE・ドバイ",            flag:"🇦🇪", tz:4,   name:"Fatima",  avatar:"🇦🇪", heading:0,   pitch:5,
+    intro:"Marhaba from Dubai! 🌆 The skyline here never gets old. First time visiting?",
+    introJa:"ドバイからマルハバ！このスカイラインは何度見ても飽きない。初めて来ますか？" },
+];
+
+// ======= HOST DATA =======
+const hosts = [
+  { id:1, name:"Hana", flag:"🇯🇵", loc:allLocations[2], area:"asia",    online:true,
+    bio:"渋谷在住10年。隠れた名店と撮影スポットが得意です。旅行前の下調べどうぞ。",
+    topics:["🗺 観光案内","📸 フォトスポット","🍜 グルメ"] },
+  { id:2, name:"Jiyeon", flag:"🇰🇷", loc:allLocations[8], area:"asia",  online:true,
+    bio:"弘大エリア在住。K-POPと韓国語練習、なんでも聞いてください！",
+    topics:["💬 語学練習","🎵 音楽","🏙 ローカルライフ"] },
+  { id:3, name:"Priya", flag:"🇮🇳", loc:allLocations[5], area:"asia",   online:false,
+    bio:"デリー生まれ。スパイスの話なら任せて。インド文化を世界に伝えたい。",
+    topics:["🍜 グルメ","🎌 文化・歴史","💬 語学練習"] },
+  { id:4, name:"Lucas", flag:"🇫🇷", loc:allLocations[0], area:"europe",  online:true,
+    bio:"パリ16区在住のフォトグラファー。観光客が知らない路地裏を案内します。",
+    topics:["📸 フォトスポット","🗺 観光案内","🎵 アート"] },
+  { id:5, name:"Oliver", flag:"🇬🇧", loc:allLocations[4], area:"europe", online:true,
+    bio:"ロンドン在住のデザイナー。パブ文化と建築の話が好きです。",
+    topics:["🎌 文化・歴史","🏙 ローカルライフ","🍜 グルメ"] },
+  { id:6, name:"Sofia", flag:"🇮🇹", loc:allLocations[7], area:"europe",  online:false,
+    bio:"ローマ生まれ。コロッセオの裏話なら2時間でも話せます（笑）",
+    topics:["🎌 文化・歴史","🗺 観光案内","🍜 グルメ"] },
+  { id:7, name:"Jordan", flag:"🇺🇸", loc:allLocations[6], area:"americas", online:true,
+    bio:"NYCブルックリン在住。スタートアップと音楽シーンに詳しいです。",
+    topics:["🏙 ローカルライフ","🎵 音楽・アート","💬 語学練習"] },
+  { id:8, name:"Gabriel", flag:"🇧🇷", loc:allLocations[3], area:"americas", online:false,
+    bio:"サンパウロ在住。サンバとブラジル料理を世界に広めたい！",
+    topics:["🍜 グルメ","🎵 音楽","🏄 アウトドア"] },
+  { id:9, name:"Fatima", flag:"🇦🇪", loc:allLocations[9], area:"middleeast", online:true,
+    bio:"ドバイ在住10年。砂漠から高層ビルまで、案内します。",
+    topics:["🗺 観光案内","🎌 文化・歴史","📸 フォトスポット"] },
+];
+
+let selectedArea = 'random';
+let currentLoc;
+let prevScreen = 's-landing';
+let chatHistory = [];   // OpenAI message history
+let timerInterval = null;
+let timerSeconds = SESSION_MINUTES * 60;
+let sessionActive = false;
+
+const areaMap = {
+  random: allLocations,
+  asia: allLocations.filter(l=>l.area==='asia'),
+  europe: allLocations.filter(l=>l.area==='europe'),
+  americas: allLocations.filter(l=>l.area==='americas'),
+  middleeast: allLocations.filter(l=>l.area==='middleeast'),
+  oceania: allLocations.filter(l=>l.area==='oceania'),
+};
+
+// ======= NAVIGATION =======
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>{
+    if(s.id===id){
+      s.style.display='flex';
+      setTimeout(()=>s.classList.remove('hidden'),10);
+      s.classList.remove('gone');
+    } else {
+      s.classList.add('hidden');
+      setTimeout(()=>{ if(s.id!==id){ s.style.display='none'; }},600);
+    }
+  });
+}
+
+let chatOpen = false;
+
+function toggleChat() {
+  const panel = document.getElementById('chatPanel');
+  const isMobile = window.innerWidth <= 640;
+  if(isMobile) {
+    chatOpen = !chatOpen;
+    panel.classList.toggle('open', chatOpen);
+  } else {
+    chatOpen = !chatOpen;
+    panel.classList.toggle('collapsed', !chatOpen);
+    document.getElementById('chatOpenBtn').classList.toggle('hidden', chatOpen);
+  }
+}
+
+// Wire up header tap for mobile
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelector('.chat-panel-header')
+    ?.addEventListener('click', ()=>{
+      if(window.innerWidth <= 640) toggleChat();
+    });
+});
+
+// キーボード出現時にパネルがつぶれないよう調整
+if(window.visualViewport) {
+  window.visualViewport.addEventListener('resize', ()=>{
+    if(window.innerWidth > 640) return;
+    const panel = document.getElementById('chatPanel');
+    if(!panel) return;
+    const keyboardHeight = window.innerHeight - window.visualViewport.height;
+    if(keyboardHeight > 100) {
+      // キーボードが出た → パネルをその分上げる
+      panel.style.bottom = keyboardHeight + 'px';
+    } else {
+      panel.style.bottom = '0';
+    }
+  });
+}
+
+function openDoorAndLaunch() {
+  const panel = document.getElementById('doorPanel');
+  const glow  = document.getElementById('doorGlow');
+  panel.classList.add('open');
+  glow.classList.add('show');
+  setTimeout(()=>{
+    const appEl = document.getElementById('s-app');
+    appEl.classList.add('visible');
+    show('s-app');
+    const pool = areaMap[selectedArea] || allLocations;
+    loadLocation(pool[Math.floor(Math.random()*pool.length)]);
+  }, 1000);
+}
+
+function goToHost() {
+  prevScreen = document.querySelector('.screen:not(.hidden):not(.gone)')?.id || 's-landing';
+  show('s-host');
+}
+
+function goBack() { show(prevScreen || 's-landing'); }
+
+function launchApp() {
+  const appEl = document.getElementById('s-app');
+  appEl.classList.add('visible');
+  show('s-app');
+  const pool = areaMap[selectedArea] || allLocations;
+  loadLocation(pool[Math.floor(Math.random()*pool.length)]);
+}
+
+// ======= AREA FILTER =======
+function toggleFilter() {
+  document.getElementById('filterMenu').classList.toggle('hidden');
+}
+
+function setArea(area, el) {
+  selectedArea = area;
+  document.querySelectorAll('.area-filter-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('filterBtn').textContent = el.textContent.replace(/PRO|無料/g,'').trim() + ' ▾';
+  document.getElementById('filterMenu').classList.add('hidden');
+}
+
+// ======= HOST BROWSER =======
+function goToHosts() {
+  prevScreen = document.querySelector('.screen:not(.hidden):not(.gone)')?.id || 's-landing';
+  renderHosts('all');
+  show('s-hosts');
+}
+
+function renderHosts(area) {
+  const grid = document.getElementById('hostsGrid');
+  const list = area === 'all' ? hosts : hosts.filter(h => h.area === area);
+  grid.innerHTML = list.map(h => `
+    <div class="host-card" onclick="connectToHost(${h.id})">
+      <div class="host-card-img">
+        <img src="https://maps.googleapis.com/maps/api/streetview?size=520x320&location=${h.loc.lat},${h.loc.lng}&heading=${h.loc.heading||0}&pitch=${h.loc.pitch||0}&key=${MAPS_KEY}" loading="lazy" alt="${h.loc.country}"/>
+        <div class="img-overlay"></div>
+        <div class="${h.online ? 'online-dot' : 'offline-dot'}"></div>
+      </div>
+      <div class="host-card-body">
+        <div class="host-card-top">
+          <div class="host-avatar-sm">${h.flag}</div>
+          <div>
+            <div class="host-card-name">${h.name}</div>
+            <div class="host-card-loc">${h.loc.country} · ${h.online ? '🟢 オンライン' : '⚫ オフライン'}</div>
+          </div>
+        </div>
+        <p class="host-card-bio">${h.bio}</p>
+        <div class="host-tags">${h.topics.map(t=>`<span class="host-tag">${t}</span>`).join('')}</div>
+        <button class="open-door-btn">${h.online ? 'この扉を開く →' : '予約する →'}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterHosts(area, el) {
+  document.querySelectorAll('.area-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderHosts(area);
+}
+
+function connectToHost(id) {
+  const host = hosts.find(h => h.id === id);
+  if(!host) return;
+  if(!host.online) { alert('このホストは現在オフラインです。\n予約機能は近日公開予定！'); return; }
+  const appEl = document.getElementById('s-app');
+  appEl.classList.add('visible');
+  show('s-app');
+  loadLocation(host.loc);
+}
+
+let selectedPlanType = 'monthly';
+let pendingArea = null;
+
+function showUpgrade(area) {
+  document.getElementById('filterMenu')?.classList.add('hidden');
+  pendingArea = area || null;
+  document.getElementById('upgradeOverlay').style.display = 'flex';
+}
+
+function closeUpgrade() {
+  document.getElementById('upgradeOverlay').style.display = 'none';
+}
+
+function selectPlanType(type) {
+  selectedPlanType = type;
+  document.getElementById('planMonthly').classList.toggle('featured', type==='monthly');
+  document.getElementById('planOnce').classList.toggle('featured', type==='once');
+}
+
+function completeUpgrade() {
+  closeUpgrade();
+  // In production: go to payment flow. For demo, unlock and fly.
+  addSys('✨ PRO解除 — エリア指定が有効になりました');
+  if(pendingArea) {
+    selectedArea = pendingArea;
+    nextDoor();
+  }
+}
+
+// close filter on outside click
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.area-filter')) {
+    document.getElementById('filterMenu')?.classList.add('hidden');
+  }
+});
+
+// ======= PLAN / HOST =======
+function selectPlan(el) {
+  document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function submitHost() {
+  alert('申請を受け付けました！\n審査完了後（1〜2営業日）にメールでご連絡します。');
+  show('s-landing');
+}
+
+// ======= LOCATION =======
+function loadLocation(loc) {
+  currentLoc = loc;
+  chatHistory = [];
+  stopTimer();
+
+  const iframe = document.getElementById('sv-iframe');
+  const loading = document.getElementById('svLoading');
+  loading.classList.remove('hidden');
+
+  iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}`
+    + `&location=${loc.lat},${loc.lng}&heading=${loc.heading||0}&pitch=${loc.pitch||0}&fov=80`;
+  iframe.onload = ()=> setTimeout(()=>loading.classList.add('hidden'), 600);
+
+  document.getElementById('overlayCountry').textContent = loc.flag+'  '+loc.country;
+  document.getElementById('overlayCoords').textContent =
+    `${Math.abs(loc.lat).toFixed(4)}°${loc.lat>=0?'N':'S'}, ${Math.abs(loc.lng).toFixed(4)}°${loc.lng>=0?'E':'W'}`;
+
+  const now=new Date(), utc=now.getTime()+now.getTimezoneOffset()*60000;
+  const local=new Date(utc+3600000*loc.tz);
+  document.getElementById('overlayTime').textContent =
+    `現地時刻: ${local.getHours().toString().padStart(2,'0')}:${local.getMinutes().toString().padStart(2,'0')}`;
+
+  // location shown in sv-overlay instead
+  document.getElementById('chatAvatar').textContent = loc.avatar;
+  document.getElementById('chatName').textContent = loc.name;
+  document.getElementById('chatSub').textContent = loc.country+' · AI ガイド';
+
+  const msgs=document.getElementById('messages');
+  msgs.innerHTML='';
+  addSys('扉が開きました — '+loc.country+'と繋がりました 🌏');
+
+  // AI opening message
+  setTimeout(()=> aiGreet(loc), 1200);
+
+  // Start timer
+  startTimer();
+}
+
+// ======= TIMER =======
+function startTimer() {
+  timerSeconds = SESSION_MINUTES * 60;
+  sessionActive = true;
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    timerSeconds--;
+    updateTimerDisplay();
+    if(timerSeconds <= 0) { clearInterval(timerInterval); showSessionEnd(); }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  sessionActive = false;
+  const badge = document.getElementById('timerBadge');
+  badge.classList.remove('warn');
+  badge.textContent = `⏱ ${String(SESSION_MINUTES).padStart(2,'0')}:00`;
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds/60);
+  const s = timerSeconds % 60;
+  const badge = document.getElementById('timerBadge');
+  badge.textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  badge.classList.toggle('warn', timerSeconds <= 60);
+}
+
+function showSessionEnd() {
+  sessionActive = false;
+  const el = document.createElement('div');
+  el.className = 'session-end-overlay';
+  el.id = 'sessionEndOverlay';
+  el.innerHTML = `
+    <div class="session-end-card">
+      <h2>⏰ セッション終了</h2>
+      <p>${currentLoc.country}との${SESSION_MINUTES}分間、いかがでしたか？<br>続けたい場合はプレミアムへ。</p>
+      <div class="session-end-btns">
+        <button class="btn-premium" onclick="extendSession()">✨ プレミアムで続ける — ¥980/月</button>
+        <p style="font-size:11px;color:#444;margin:-4px 0 4px;">ホストには¥500/セッションお支払い</p>
+        <button class="btn-next" onclick="closeEndAndNext()">次の扉を開く →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  document.getElementById('chatInput').disabled = true;
+}
+
+function extendSession() {
+  document.getElementById('sessionEndOverlay')?.remove();
+  document.getElementById('chatInput').disabled = false;
+  addSys('✨ プレミアムプランでセッションを延長しました');
+  startTimer();
+}
+
+function closeEndAndNext() {
+  document.getElementById('sessionEndOverlay')?.remove();
+  document.getElementById('chatInput').disabled = false;
+  nextDoor();
+}
+
+function nextDoor() {
+  const pool = areaMap[selectedArea]||allLocations;
+  loadLocation(pool[Math.floor(Math.random()*pool.length)]);
+}
+
+// ======= CHAT =======
+function addSys(t){
+  const m=document.getElementById('messages');
+  const d=document.createElement('div');
+  d.style.cssText='text-align:center;font-size:11px;color:#3a3a3a;padding:2px 0;';
+  d.textContent=t; m.appendChild(d); m.scrollTop=m.scrollHeight;
+}
+
+function addMsg(text,translation,isMe){
+  const msgs=document.getElementById('messages');
+  let tip;
+  if(!isMe){
+    tip=document.createElement('div');
+    tip.className='msg';
+    tip.innerHTML='<div class="typing-indicator"><span></span><span></span><span></span></div>';
+    msgs.appendChild(tip); msgs.scrollTop=msgs.scrollHeight;
+  }
+  setTimeout(()=>{
+    if(tip) msgs.removeChild(tip);
+    const d=document.createElement('div');
+    d.className='msg'+(isMe?' me':'');
+    const t=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    let b=`<div class="msg-bubble">${text}`;
+    if(translation&&!isMe) b+=`<div class="translated">🤖<span class="ai-badge">AI訳</span> ${translation}</div>`;
+    b+=`</div>`;
+    d.innerHTML=`<div class="msg-time">${t}</div>${b}`;
+    msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+  }, isMe?0:900+Math.random()*600);
+}
+
+// ======= AI =======
+function buildSystemPrompt(loc) {
+  const now=new Date(), utc=now.getTime()+now.getTimezoneOffset()*60000;
+  const local=new Date(utc+3600000*loc.tz);
+  const timeStr=`${local.getHours()}:${String(local.getMinutes()).padStart(2,'0')}`;
+  return `You are ${loc.name}, a local resident of ${loc.country}.
+The user has "teleported" to your neighborhood via an app called Door — they can see your street through Street View.
+Current local time where you are: ${timeStr}.
+Your personality: warm, curious, proud of your city, slightly surprised by the visitor.
+Rules:
+- Keep each reply to 1–2 short sentences max.
+- Occasionally mention something specific and interesting about your location (food, weather, a local landmark, daily life).
+- Ask the user a question in every 2nd or 3rd message to keep the conversation going.
+- Respond in the same language the user writes in. If Japanese, reply in Japanese naturally.
+- Never break character or mention AI.`;
+}
+
+async function aiGreet(loc) {
+  const systemPrompt = buildSystemPrompt(loc);
+  chatHistory = [{ role:'system', content: systemPrompt }];
+
+  const greetPrompt = `You just noticed someone appeared on your street via the Door app.
+Say a short, warm greeting in character as ${loc.name} from ${loc.country}.
+Mention something about the current moment or your surroundings (1–2 sentences).
+Respond in Japanese.`;
+
+  // Show typing first
+  const msgs = document.getElementById('messages');
+  const tip = document.createElement('div');
+  tip.className = 'msg';
+  tip.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+  msgs.appendChild(tip);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const reply = await callAI(greetPrompt, false);
+  tip.remove();
+
+  if(reply) {
+    addAIBubble(reply);
+  } else {
+    // フォールバック：プリセットの挨拶を使う
+    const fallback = loc.introJa || loc.intro;
+    addAIBubble(fallback);
+  }
+}
+
+async function callAI(userMessage, addToHistory=true) {
+  if(addToHistory) chatHistory.push({ role:'user', content: userMessage });
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: addToHistory ? chatHistory : [
+          { role:'system', content: buildSystemPrompt(currentLoc) },
+          { role:'user', content: userMessage }
+        ],
+        max_tokens: 120,
+        temperature: 0.85
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim();
+    if(reply && addToHistory) chatHistory.push({ role:'assistant', content: reply });
+    return reply;
+  } catch(e) {
+    console.error('AI call failed:', e);
+    return null;
+  }
+}
+
+function addAIBubble(text) {
+  const msgs=document.getElementById('messages');
+  const d=document.createElement('div');
+  d.className='msg';
+  const t=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML=`<div class="msg-time">${t}</div><div class="msg-bubble">${text}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs=document.getElementById('messages');
+  const el=document.createElement('div');
+  el.className='msg'; el.id='aiTyping';
+  el.innerHTML='<div class="typing-indicator"><span></span><span></span><span></span></div>';
+  msgs.appendChild(el); msgs.scrollTop=msgs.scrollHeight;
+  return el;
+}
+
+async function sendMessage(){
+  if(!sessionActive) return;
+  const inp=document.getElementById('chatInput');
+  const t=inp.value.trim(); if(!t) return;
+  addMsg(t,null,true); inp.value='';
+  inp.disabled=true;
+
+  const typing=showTyping();
+  const reply = await callAI(t);
+  typing.remove();
+  if(reply) {
+    addAIBubble(reply, true);
+  } else {
+    addAIBubble('ごめんなさい、少し聞き取れませんでした。もう一度話しかけてみてください 😊');
+  }
+  inp.disabled=false; inp.focus();
+}
+
+// ======= VOICE =======
+const langMap = {
+  'asia': 'ja-JP', 'europe': 'en-GB', 'americas': 'en-US',
+  'middleeast': 'en-US', 'oceania': 'en-AU',
+};
+const locLangMap = {
+  '🇯🇵': 'ja-JP', '🇰🇷': 'ko-KR', '🇫🇷': 'fr-FR',
+  '🇬🇧': 'en-GB', '🇮🇹': 'it-IT', '🇧🇷': 'pt-BR',
+  '🇺🇸': 'en-US', '🇦🇺': 'en-AU', '🇮🇳': 'hi-IN', '🇦🇪': 'ar-AE',
+};
+
+let recognition = null;
+let isRecording = false;
+
+function toggleMic() {
+  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert('このブラウザは音声入力に対応していません。Chromeをお使いください。');
+    return;
+  }
+  if(isRecording) { recognition?.stop(); return; }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ja-JP';  // input always Japanese
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('chatInput').placeholder = '🎤 話してください...';
+  };
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('chatInput').value = transcript;
+    sendMessage();
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    document.getElementById('micBtn').classList.remove('recording');
+    document.getElementById('chatInput').placeholder = 'メッセージを送る、またはマイクで話す...';
+  };
+
+  recognition.onerror = () => recognition.onend();
+  recognition.start();
+}
+
+function speak(text, btnEl) {
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+
+  const lang = currentLoc ? (locLangMap[currentLoc.flag] || 'en-US') : 'en-US';
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang;
+  utter.rate = 0.95;
+  utter.pitch = 1.05;
+
+  if(btnEl) {
+    btnEl.classList.add('speaking');
+    utter.onend = () => btnEl.classList.remove('speaking');
+  }
+  window.speechSynthesis.speak(utter);
+}
+
+// Override addAIBubble to include speak button
+function addAIBubble(text, autoSpeak=false) {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg';
+  const t = new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  const speakId = 'speak-' + Date.now();
+  d.innerHTML = `
+    <div class="msg-time">${t}</div>
+    <div>
+      <div class="msg-bubble">${text}</div>
+      <button class="speak-btn" id="${speakId}" onclick="speak('${text.replace(/'/g,"\\'")}', this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        読み上げ
+      </button>
+    </div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  if(autoSpeak) {
+    setTimeout(() => speak(text, document.getElementById(speakId)), 300);
+  }
+}
+</script>
+</body>
+</html>
