@@ -1604,7 +1604,7 @@ function addSys(t){
   const m=document.getElementById('messages');
   const d=document.createElement('div');
   d.style.cssText='text-align:center;font-size:11px;color:#3a3a3a;padding:2px 0;';
-  d.textContent=t; m.appendChild(d); m.scrollTop=m.scrollHeight;
+  d.innerHTML=t; m.appendChild(d); m.scrollTop=m.scrollHeight;
 }
 
 function addMsg(text,translation,isMe){
@@ -1644,7 +1644,7 @@ Rules:
 - Ask the user a question in every 2nd or 3rd message to keep the conversation going.
 - Respond in the same language the user writes in. If Japanese, reply in Japanese naturally.
 - Never break character or mention AI.
-- NAVIGATION: If the user wants to go or see a specific place IN YOUR CITY ONLY, silently append [MOVE:lat,lng,heading] at the very end of your reply. Use precise outdoor street-level GPS coordinates (not indoor/underground). heading is compass direction (0=north,90=east,180=south,270=west). If the user asks to go somewhere outside your city, kindly say you can only show places in ${loc.country}. Do not explain the tag. Only append when user explicitly asks to go/see somewhere.`;
+- NAVIGATION: If the user wants to go or see a specific place IN YOUR CITY ONLY, append [MOVE:lat,lng,heading] and [NAME:place_name_in_japanese] at the very end of your reply (e.g. [MOVE:48.8584,2.2945,90][NAME:エッフェル塔]). Use precise outdoor street-level GPS coordinates (not indoor/underground). heading is compass direction (0=north,90=east,180=south,270=west). Also describe the atmosphere, vibe, smells or sounds of the place briefly in your reply. If the user asks to go somewhere outside your city, kindly say you can only show places in ${loc.country}. Do not explain the tags. Only append when user explicitly asks to go/see somewhere.`;
 }
 
 async function aiGreet(loc) {
@@ -1742,22 +1742,29 @@ async function sendMessage(){
   const reply = await callAI(t);
   typing.remove();
   if(reply) {
-    // [MOVE:lat,lng,heading] タグを解析してStreet Viewを更新
+    // [MOVE:lat,lng,heading] と [NAME:...] タグを解析
     const moveMatch = reply.match(/\[?\s*MOVE\s*:\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,?\s*(\d*)\s*\]?/i);
-    const cleanReply = reply.replace(/\[?\s*MOVE\s*:\s*[-\d.,\s]+\]?/gi, '').trim();
+    const nameMatch = reply.match(/\[NAME:([^\]]+)\]/i);
+    const cleanReply = reply
+      .replace(/\[?\s*MOVE\s*:\s*[-\d.,\s]+\]?/gi, '')
+      .replace(/\[NAME:[^\]]*\]/gi, '')
+      .trim();
     addAIBubble(cleanReply, true);
     if(moveMatch) {
       const lat = parseFloat(moveMatch[1]);
       const lng = parseFloat(moveMatch[2]);
       const heading = parseInt(moveMatch[3]) || 0;
+      const placeName = nameMatch ? nameMatch[1].trim() : null;
       // 現在都市のバウンディングボックス内かチェック（約50km圏内）
-      const cityBounds = 0.5; // 緯度経度0.5度 ≈ 約55km
+      const cityBounds = 0.5;
       const withinCity = Math.abs(lat - currentLoc.lat) < cityBounds && Math.abs(lng - currentLoc.lng) < cityBounds;
       if(!withinCity) {
         addSys('🔒 別エリアへの移動はPROプランで');
         showUpgrade();
       } else {
-        addSys('📍 移動しました');
+        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+        const label = placeName || '地図で確認';
+        addSys(`📍 移動しました &nbsp;<a href="${mapsUrl}" target="_blank" style="color:#667eea;font-size:12px;text-decoration:none;">🗺 ${label}をGoogleマップで見る →</a>`);
         updateStreetView(lat, lng, heading);
       }
     }
