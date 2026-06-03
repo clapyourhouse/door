@@ -1844,7 +1844,7 @@ async function sendMessage(){
         showUpgrade();
       } else {
         const mapsUrl = placeName
-          ? `https://maps.google.com/?q=${lat},${lng}`
+          ? `https://www.google.com/maps/search/${encodeURIComponent(placeName)}/@${lat},${lng},17z`
           : `https://maps.google.com/maps/@${lat},${lng},17z`;
         const label = placeName || 'Googleマップで開く';
         addSys(`📍 <a href="${mapsUrl}" target="_blank" style="color:#667eea;text-decoration:none;font-size:12px;">${label} →</a>`);
