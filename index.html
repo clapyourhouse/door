@@ -977,7 +977,7 @@ html, body {
       <span class="hud-logo">DOOR</span>
     </div>
     <div class="hud-right">
-      <div class="timer-badge" id="timerBadge">⏱ 30:00</div>
+      <div class="timer-badge" id="timerBadge" style="display:none;">⏱ 30:00</div>
       <button class="hud-btn" style="color:#4ade80;border-color:rgba(74,222,128,0.3);" onclick="showUpgrade()">🎙 ガイドと通話 <span style="font-size:9px;opacity:0.7;">PRO・近日公開</span></button>
       <button class="hud-btn" onclick="goToHosts()">ホストを選ぶ</button>
       <button class="hud-btn hud-btn-primary" onclick="goToHost()">ホストになる</button>
@@ -1316,6 +1316,9 @@ function show(id) {
 let chatOpen = false;
 let greetTimeout = null;
 let greetId = 0;
+let freeChatCount = 0;      // 無料ユーザーの累計チャット回数
+const FREE_CHAT_LIMIT = 3;  // 無料は3回まで
+let isPro = false;          // PROフラグ（将来的に認証と連携）
 
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
@@ -1496,6 +1499,7 @@ function submitHost() {
 function loadLocation(loc) {
   currentLoc = loc;
   chatHistory = [];
+  freeChatCount = 0;
   stopTimer();
 
   const iframe = document.getElementById('sv-iframe');
@@ -1594,6 +1598,36 @@ function extendSession() {
 function closeEndAndNext() {
   document.getElementById('sessionEndOverlay')?.remove();
   document.getElementById('chatInput').disabled = false;
+  nextDoor();
+}
+
+function showChatLimitModal() {
+  const shareText = encodeURIComponent(`扉を開いたら${currentLoc.country}に飛んだ🚪\nその場の街並みを見ながら現地のガイドと話せるの、なにこれ面白すぎ\n#Door`);
+  const shareUrl = encodeURIComponent('https://clapyourhouse.github.io/door');
+  const el = document.createElement('div');
+  el.className = 'session-end-overlay';
+  el.id = 'chatLimitOverlay';
+  el.innerHTML = `
+    <div class="session-end-card">
+      <h2>💬 もっと話したい？</h2>
+      <p>${currentLoc.country}のガイドともっと深く話すには<br>PROプランへどうぞ。</p>
+      <div class="session-end-btns">
+        <button class="btn-premium" onclick="unlockPro()">✨ PROで続ける — ¥500/月</button>
+        <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" style="display:block;width:100%;padding:13px;background:#1d9bf0;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;text-align:center;text-decoration:none;">𝕏 この体験をシェアする</a>
+        <button class="btn-next" onclick="closeLimitAndNext()">次の扉を開く →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function unlockPro() {
+  isPro = true;
+  document.getElementById('chatLimitOverlay')?.remove();
+  addSys('✨ PROプランで制限解除されました');
+}
+
+function closeLimitAndNext() {
+  document.getElementById('chatLimitOverlay')?.remove();
   nextDoor();
 }
 
@@ -1743,8 +1777,16 @@ async function sendMessage(){
   if(!sessionActive) return;
   const inp=document.getElementById('chatInput');
   const t=inp.value.trim(); if(!t) return;
+
+  // 無料プランのチャット回数チェック
+  if(!isPro && freeChatCount >= FREE_CHAT_LIMIT) {
+    showChatLimitModal();
+    return;
+  }
+
   addMsg(t,null,true); inp.value='';
   inp.disabled=true;
+  if(!isPro) freeChatCount++;
 
   const typing=showTyping();
   const reply = await callAI(t);
