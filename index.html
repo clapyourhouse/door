@@ -1226,8 +1226,8 @@ const allLocations = [
   { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",    flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
     intro:"NYC here 🗽 Times Square never sleeps. Where in the world are you?",
     introJa:"NYCのタイムズスクエアです！世界中どこからつないでるの？" },
-  { lat:35.6592,  lng:139.7016, area:'asia',     country:"日本・東京（渋谷）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:270, pitch:5,
-    intro:"こんにちは！渋谷のスクランブル交差点そばです☕ どこから来たの？",
+  { lat:35.6702,  lng:139.7026, area:'asia',     country:"日本・東京（原宿）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:180, pitch:5,
+    intro:"こんにちは！原宿の竹下通りそばです🛍️ どこから来たの？",
     introJa:null },
   { lat:41.9028,  lng:12.4964,  area:'europe',   country:"イタリア・ローマ",          flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:310, pitch:5,
     intro:"Ciao from Rome! 🍕 Near the Colosseum today. Have you ever been to Italy?",
@@ -1662,10 +1662,13 @@ Respond in Japanese.`;
     const fallback = loc.introJa || loc.intro;
     addAIBubble(fallback);
   }
-  // 自然なヒントを少し遅れて表示
-  setTimeout(() => {
-    addSys('💡 「〇〇に連れて行って」と言うとその場所のストリートに移動できます');
-  }, 3000);
+  // 自然なヒントを1回だけ表示
+  if(!window._hintShown) {
+    window._hintShown = true;
+    setTimeout(() => {
+      addSys('💡 「〇〇に連れて行って」と言うとその場所のストリートに移動できます');
+    }, 3000);
+  }
 }
 
 async function callAI(userMessage, addToHistory=true) {
