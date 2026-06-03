@@ -1810,7 +1810,7 @@ async function sendMessage(){
         showUpgrade();
       } else {
         const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
-        const label = placeName || '地図で確認';
+        const label = placeName || 'Googleマップで開く';
         addSys(`📍 <a href="${mapsUrl}" target="_blank" style="color:#667eea;text-decoration:none;font-size:12px;">${label} →</a>`);
         updateStreetView(lat, lng, heading);
       }
