@@ -1314,6 +1314,7 @@ function show(id) {
 }
 
 let chatOpen = false;
+let greetTimeout = null;
 
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
@@ -1519,12 +1520,13 @@ function loadLocation(loc) {
   document.getElementById('chatSub').textContent = loc.country+' · AI ガイド';
 
   window._hintShown = false;
+  clearTimeout(greetTimeout);
   const msgs=document.getElementById('messages');
   msgs.innerHTML='';
   addSys('扉が開きました — '+loc.country+'と繋がりました 🌏');
 
   // AI opening message
-  setTimeout(()=> aiGreet(loc), 1200);
+  greetTimeout = setTimeout(()=> aiGreet(loc), 1200);
 
   // Start timer
   startTimer();
