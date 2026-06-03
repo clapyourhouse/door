@@ -1217,29 +1217,37 @@ const OPENAI_KEY = ['sk-proj-lq9IHb2yM86hc-heXVDAVjOPJvzvx_5xHYYC8LUHii2rGGWQyPT
 const SESSION_MINUTES = 30;
 
 const allLocations = [
-  { lat:48.8584,  lng:2.2945,   area:'europe',   country:"フランス・パリ",            flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:80,  pitch:5,
-    intro:"Bonjour! Near the Eiffel Tower right now ☕ Are you traveling to Paris someday?",
-    introJa:"こんにちは！エッフェル塔のそばにいます。パリに来たことありますか？" },
-  { lat:37.5563,  lng:126.9244, area:'asia',     country:"韓国・ソウル（弘大）",      flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:30,  pitch:0,
-    intro:"안녕하세요! In Hongdae now — best area for cafés and music 🧋 Ever been to Seoul?",
-    introJa:"ソウルの弘大にいます！カフェと音楽の街。韓国来たことありますか？" },
-  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",    flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
-    intro:"NYC here 🗽 Times Square never sleeps. Where in the world are you?",
-    introJa:"NYCのタイムズスクエアです！世界中どこからつないでるの？" },
-  { lat:35.6702,  lng:139.7026, area:'asia',     country:"日本・東京（原宿）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:180, pitch:5,
-    intro:"こんにちは！原宿の竹下通りそばです🛍️ どこから来たの？",
+  // パリ・シャンゼリゼ通り（歩道あり・青線確認済み）
+  { lat:48.8698,  lng:2.3078,   area:'europe',   country:"フランス・パリ",            flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:270, pitch:0,
+    intro:"Bonjour! On the Champs-Élysées right now ☕ One of the most beautiful streets in the world. Traveling to Paris someday?",
+    introJa:"こんにちは！シャンゼリゼ通りにいます。世界で最も美しい通りのひとつ。パリに来たことありますか？" },
+  // ソウル・明洞（歩行者天国・青線確認済み）
+  { lat:37.5636,  lng:126.9823, area:'asia',     country:"韓国・ソウル（明洞）",      flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:0,   pitch:0,
+    intro:"안녕하세요! In Myeongdong now — shopping street full of life 🧋 Ever been to Seoul?",
+    introJa:"ソウルの明洞にいます！ショッピングの街、いつも賑やか。韓国来たことありますか？" },
+  // NYC・5番街（青線確認済み）
+  { lat:40.7580,  lng:-73.9784, area:'americas', country:"アメリカ・ニューヨーク",    flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:180, pitch:5,
+    intro:"NYC here 🗽 5th Avenue — the city that never sleeps. Where in the world are you?",
+    introJa:"NYCの5番街です！眠らない街。世界中どこからつないでるの？" },
+  // 東京・表参道（青線確認済み）
+  { lat:35.6654,  lng:139.7126, area:'asia',     country:"日本・東京（表参道）",      flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:270, pitch:0,
+    intro:"こんにちは！表参道にいます🌿 おしゃれなカフェとブランドが並ぶ通り。どこから来たの？",
     introJa:null },
-  { lat:41.9028,  lng:12.4964,  area:'europe',   country:"イタリア・ローマ",          flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:310, pitch:5,
-    intro:"Ciao from Rome! 🍕 Near the Colosseum today. Have you ever been to Italy?",
-    introJa:"ローマからチャオ！コロッセオの近くにいます。イタリアに来たことある？" },
-  { lat:-33.8568, lng:151.2153, area:'oceania',  country:"オーストラリア・シドニー",  flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:0,   pitch:5,
-    intro:"Hey from Sydney! 🦘 Near the Opera House. Beautiful day today — where are you?",
-    introJa:"シドニーからこんにちは！オペラハウスの近くです。そっちの天気はどう？" },
-  { lat:51.5007,  lng:-0.1246,  area:'europe',   country:"イギリス・ロンドン",        flag:"🇬🇧", tz:0,   name:"Oliver",  avatar:"🇬🇧", heading:270, pitch:5,
-    intro:"Hello from London! ☁️ Big Ben view today. It's raining, naturally. Where are you from?",
-    introJa:"ロンドンからこんにちは！ビッグベンが見えます。もちろん雨ですよ（笑）" },
-  { lat:35.6586,  lng:139.7454, area:'asia',     country:"日本・東京（六本木）",      flag:"🇯🇵", tz:9,   name:"Kenji",   avatar:"🇯🇵", heading:180, pitch:0,
-    intro:"六本木からこんにちは！夜景がきれいな場所ですよ。どこから来たの？",
+  // ローマ・コロッセオ周辺（青線確認済み）
+  { lat:41.8902,  lng:12.4924,  area:'europe',   country:"イタリア・ローマ",          flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:270, pitch:5,
+    intro:"Ciao from Rome! 🍕 Standing right in front of the Colosseum. Have you ever been to Italy?",
+    introJa:"ローマからチャオ！コロッセオの前にいます。イタリアに来たことある？" },
+  // シドニー・サーキュラーキー（青線確認済み）
+  { lat:-33.8611, lng:151.2102, area:'oceania',  country:"オーストラリア・シドニー",  flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:90,  pitch:0,
+    intro:"Hey from Sydney! 🦘 Circular Quay — Opera House is right there. Beautiful day. Where are you?",
+    introJa:"シドニーのサーキュラーキーです！オペラハウスがすぐそこ。そっちの天気はどう？" },
+  // ロンドン・テムズ川沿い（青線確認済み）
+  { lat:51.5033,  lng:-0.1196,  area:'europe',   country:"イギリス・ロンドン",        flag:"🇬🇧", tz:0,   name:"Oliver",  avatar:"🇬🇧", heading:270, pitch:0,
+    intro:"Hello from London! ☁️ On the South Bank of the Thames. Big Ben across the river. Where are you from?",
+    introJa:"ロンドンのテムズ川沿いです！対岸にビッグベンが見えます。もちろん曇りですよ（笑）" },
+  // 東京・新宿（青線確認済み）
+  { lat:35.6896,  lng:139.7006, area:'asia',     country:"日本・東京（新宿）",        flag:"🇯🇵", tz:9,   name:"Kenji",   avatar:"🇯🇵", heading:90,  pitch:0,
+    intro:"新宿からこんにちは！日本最大の駅の近く、いつも人でいっぱいです。どこから来たの？",
     introJa:null },
 ];
 
@@ -1510,6 +1518,7 @@ function loadLocation(loc) {
   document.getElementById('chatName').textContent = loc.name;
   document.getElementById('chatSub').textContent = loc.country+' · AI ガイド';
 
+  window._hintShown = false;
   const msgs=document.getElementById('messages');
   msgs.innerHTML='';
   addSys('扉が開きました — '+loc.country+'と繋がりました 🌏');
