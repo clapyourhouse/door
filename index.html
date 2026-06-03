@@ -1736,8 +1736,16 @@ async function sendMessage(){
       const lat = parseFloat(moveMatch[1]);
       const lng = parseFloat(moveMatch[2]);
       const heading = parseInt(moveMatch[3]) || 0;
-      addSys('📍 移動しました');
-      updateStreetView(lat, lng, heading);
+      // 現在都市のバウンディングボックス内かチェック（約50km圏内）
+      const cityBounds = 0.5; // 緯度経度0.5度 ≈ 約55km
+      const withinCity = Math.abs(lat - currentLoc.lat) < cityBounds && Math.abs(lng - currentLoc.lng) < cityBounds;
+      if(!withinCity) {
+        addSys('🔒 別エリアへの移動はPROプランで');
+        showUpgrade();
+      } else {
+        addSys('📍 移動しました');
+        updateStreetView(lat, lng, heading);
+      }
     }
   } else {
     addAIBubble('ごめんなさい、少し聞き取れませんでした。もう一度話しかけてみてください 😊');
