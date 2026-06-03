@@ -1749,7 +1749,7 @@ function updateStreetView(lat, lng, heading) {
   // 黒いオーバーレイで扉が閉じる→開くアニメーション
   const overlay = document.createElement('div');
   overlay.style.cssText = `position:absolute;inset:0;background:#000;z-index:5;opacity:0;transition:opacity 0.5s ease;pointer-events:none;`;
-  document.getElementById('s-app').appendChild(overlay);
+  document.body.appendChild(overlay);
   requestAnimationFrame(() => {
     overlay.style.opacity = '1';
     setTimeout(() => {
