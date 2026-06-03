@@ -1746,14 +1746,20 @@ async function sendMessage(){
 }
 
 function updateStreetView(lat, lng, heading) {
-  const iframe = document.getElementById('sv-iframe');
-  // 扉が閉じて開くアニメーション
-  iframe.style.transition = 'opacity 0.4s ease';
-  iframe.style.opacity = '0';
-  setTimeout(() => {
-    iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
-    iframe.style.opacity = '1';
-  }, 400);
+  // 黒いオーバーレイで扉が閉じる→開くアニメーション
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:absolute;inset:0;background:#000;z-index:5;opacity:0;transition:opacity 0.5s ease;pointer-events:none;`;
+  document.getElementById('s-app').appendChild(overlay);
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    setTimeout(() => {
+      document.getElementById('sv-iframe').src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
+      }, 800);
+    }, 500);
+  });
 }
 
 // ======= VOICE =======
