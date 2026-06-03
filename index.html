@@ -1315,6 +1315,7 @@ function show(id) {
 
 let chatOpen = false;
 let greetTimeout = null;
+let greetId = 0;
 
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
@@ -1521,12 +1522,14 @@ function loadLocation(loc) {
 
   window._hintShown = false;
   clearTimeout(greetTimeout);
+  greetId++;
+  const myGreetId = greetId;
   const msgs=document.getElementById('messages');
   msgs.innerHTML='';
   addSys('扉が開きました — '+loc.country+'と繋がりました 🌏');
 
   // AI opening message
-  greetTimeout = setTimeout(()=> aiGreet(loc), 1200);
+  greetTimeout = setTimeout(()=> aiGreet(loc, myGreetId), 1200);
 
   // Start timer
   startTimer();
@@ -1647,7 +1650,7 @@ Rules:
 - NAVIGATION: If the user wants to go or see a specific place IN YOUR CITY ONLY, append [MOVE:lat,lng,heading] and [NAME:place_name_in_japanese] at the very end of your reply (e.g. [MOVE:48.8584,2.2945,90][NAME:エッフェル塔]). Use precise outdoor street-level GPS coordinates (not indoor/underground). heading is compass direction (0=north,90=east,180=south,270=west). Also describe the atmosphere, vibe, smells or sounds of the place briefly in your reply. If the user asks to go somewhere outside your city, kindly say you can only show places in ${loc.country}. Do not explain the tags. Only append when user explicitly asks to go/see somewhere.`;
 }
 
-async function aiGreet(loc) {
+async function aiGreet(loc, id) {
   const systemPrompt = buildSystemPrompt(loc);
   chatHistory = [{ role:'system', content: systemPrompt }];
 
@@ -1665,6 +1668,10 @@ Respond in Japanese.`;
   msgs.scrollTop = msgs.scrollHeight;
 
   const reply = await callAI(greetPrompt, false);
+
+  // 別のロケーションに移動済みなら破棄
+  if(id !== greetId) { tip.remove(); return; }
+
   tip.remove();
 
   if(reply) {
@@ -1677,6 +1684,7 @@ Respond in Japanese.`;
   if(!window._hintShown) {
     window._hintShown = true;
     setTimeout(() => {
+      if(id !== greetId) return;
       addSys('💡 「〇〇に連れて行って」と言うとその場所のストリートに移動できます');
     }, 3000);
   }
@@ -1762,9 +1770,11 @@ async function sendMessage(){
         addSys('🔒 別エリアへの移動はPROプランで');
         showUpgrade();
       } else {
-        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+        const mapsUrl = placeName
+          ? `https://maps.google.com/?q=${encodeURIComponent(placeName + ' ' + currentLoc.country)}`
+          : `https://maps.google.com/?q=${lat},${lng}`;
         const label = placeName || '地図で確認';
-        addSys(`📍 移動しました &nbsp;<a href="${mapsUrl}" target="_blank" style="color:#667eea;font-size:12px;text-decoration:none;">🗺 ${label}をGoogleマップで見る →</a>`);
+        addSys(`📍 <a href="${mapsUrl}" target="_blank" style="color:#667eea;text-decoration:none;font-size:12px;">${label} →</a>`);
         updateStreetView(lat, lng, heading);
       }
     }
