@@ -1216,36 +1216,69 @@ const SESSION_MINUTES = 30;
 
 const allLocations = [
   // パリ・シャンゼリゼ通り（歩道あり・青線確認済み）
-  { lat:48.8698,  lng:2.3078,   area:'europe',   country:"フランス・パリ",            flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:270, pitch:0,
-    intro:"Bonjour! On the Champs-Élysées right now ☕ One of the most beautiful streets in the world. Traveling to Paris someday?",
-    introJa:"こんにちは！シャンゼリゼ通りにいます。世界で最も美しい通りのひとつ。パリに来たことありますか？" },
-  // ソウル・明洞（歩行者天国・青線確認済み）
+  // パリ①シャンゼリゼ
+  { lat:48.8726,  lng:2.3044,   area:'europe',   country:"フランス・パリ",            flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:90,  pitch:0,
+    intro:"Bonjour! On the Champs-Élysées right now ☕ One of the most beautiful avenues in the world. Traveling to Paris someday?",
+    introJa:"シャンゼリゼ通りにいます！パリで最も有名な大通り。来たことありますか？" },
+  // パリ②モンマルトル
+  { lat:48.8867,  lng:2.3396,   area:'europe',   country:"フランス・パリ（モンマルトル）", flag:"🇫🇷", tz:1, name:"Lucas", avatar:"🇫🇷", heading:180, pitch:0,
+    intro:"Bonjour from Montmartre! 🎨 Artists everywhere, cobblestone streets, Sacré-Cœur up ahead. Magical place.",
+    introJa:"モンマルトルからボンジュール！画家の街、石畳が続いています。サクレクールもすぐそこです。" },
+  // ソウル①明洞
   { lat:37.5636,  lng:126.9823, area:'asia',     country:"韓国・ソウル（明洞）",      flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:0,   pitch:0,
-    intro:"안녕하세요! In Myeongdong now — shopping street full of life 🧋 Ever been to Seoul?",
-    introJa:"ソウルの明洞にいます！ショッピングの街、いつも賑やか。韓国来たことありますか？" },
-  // NYC・5番街（青線確認済み）
-  { lat:40.7580,  lng:-73.9784, area:'americas', country:"アメリカ・ニューヨーク",    flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:180, pitch:5,
-    intro:"NYC here 🗽 5th Avenue — the city that never sleeps. Where in the world are you?",
-    introJa:"NYCの5番街です！眠らない街。世界中どこからつないでるの？" },
-  // 東京・表参道（青線確認済み）
-  { lat:35.6654,  lng:139.7126, area:'asia',     country:"日本・東京（表参道）",      flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:270, pitch:0,
-    intro:"こんにちは！表参道にいます🌿 おしゃれなカフェとブランドが並ぶ通り。どこから来たの？",
+    intro:"안녕하세요! Myeongdong shopping street — street food everywhere 🧋 Ever been to Seoul?",
+    introJa:"ソウルの明洞です！屋台グルメが並ぶショッピング通り。韓国来たことありますか？" },
+  // ソウル②弘大
+  { lat:37.5563,  lng:126.9239, area:'asia',     country:"韓国・ソウル（弘大）",      flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:270, pitch:0,
+    intro:"Hongdae vibes! 🎵 Young, artsy, full of cafes and live music. This area never sleeps.",
+    introJa:"弘大エリアです！アートとカフェと音楽の街。若者が集まるエネルギッシュな場所です。" },
+  // NYC①タイムズスクエア
+  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク（タイムズスクエア）", flag:"🇺🇸", tz:-5, name:"Jordan", avatar:"🇺🇸", heading:0, pitch:0,
+    intro:"Times Square! 🗽 Billboards everywhere, yellow cabs, pure NYC energy. Where in the world are you?",
+    introJa:"タイムズスクエアです！看板だらけ、イエローキャブ、NYのエネルギー全開。どこからつないでるの？" },
+  // NYC②ブルックリンブリッジ
+  { lat:40.7061,  lng:-73.9969, area:'americas', country:"アメリカ・ニューヨーク（ブルックリン）", flag:"🇺🇸", tz:-5, name:"Jordan", avatar:"🇺🇸", heading:315, pitch:5,
+    intro:"Brooklyn Bridge area 🌉 Manhattan skyline in the background. One of the best views in NYC.",
+    introJa:"ブルックリンブリッジのそばです！マンハッタンのスカイラインが背後に。NYで最高の景色のひとつ。" },
+  // 東京①表参道
+  { lat:35.6680,  lng:139.7058, area:'asia',     country:"日本・東京（表参道）",      flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:270, pitch:0,
+    intro:"表参道ヒルズの前にいます🌿 おしゃれなブランドとカフェが並ぶ大人の原宿。どこから来たの？",
     introJa:null },
-  // ローマ・コロッセオ周辺（青線確認済み）
+  // 東京②渋谷スクランブル
+  { lat:35.6595,  lng:139.7005, area:'asia',     country:"日本・東京（渋谷）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:20,  pitch:0,
+    intro:"渋谷スクランブル交差点です！世界一有名な交差点、一度に数千人が渡ります。すごくないですか？",
+    introJa:null },
+  // ローマ①コロッセオ
   { lat:41.8902,  lng:12.4924,  area:'europe',   country:"イタリア・ローマ",          flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:270, pitch:5,
-    intro:"Ciao from Rome! 🍕 Standing right in front of the Colosseum. Have you ever been to Italy?",
-    introJa:"ローマからチャオ！コロッセオの前にいます。イタリアに来たことある？" },
-  // シドニー・サーキュラーキー（青線確認済み）
-  { lat:-33.8611, lng:151.2102, area:'oceania',  country:"オーストラリア・シドニー",  flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:90,  pitch:0,
-    intro:"Hey from Sydney! 🦘 Circular Quay — Opera House is right there. Beautiful day. Where are you?",
-    introJa:"シドニーのサーキュラーキーです！オペラハウスがすぐそこ。そっちの天気はどう？" },
-  // ロンドン・テムズ川沿い（青線確認済み）
+    intro:"Ciao from Rome! 🍕 Right in front of the Colosseum. 2000 years of history around me.",
+    introJa:"ローマのコロッセオ前です！2000年の歴史に囲まれています。イタリアに来たことある？" },
+  // ローマ②トレビの泉周辺
+  { lat:41.9009,  lng:12.4831,  area:'europe',   country:"イタリア・ローマ（トレビ）", flag:"🇮🇹", tz:1,  name:"Sofia",   avatar:"🇮🇹", heading:180, pitch:0,
+    intro:"Near Trevi Fountain! 🪙 Toss a coin and you'll return to Rome — that's the legend. Can you hear the water?",
+    introJa:"トレビの泉の近くです！コインを投げると再びローマに来られるという伝説があります。" },
+  // シドニー①オペラハウス前
+  { lat:-33.8568, lng:151.2153, area:'oceania',  country:"オーストラリア・シドニー",  flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:270, pitch:0,
+    intro:"Hey from Sydney Opera House! 🦘 Standing right by the water. Harbour Bridge to the left. Perfect day.",
+    introJa:"シドニー・オペラハウス前です！水辺に立っています。左にハーバーブリッジが見えます。" },
+  // シドニー②ボンダイビーチ
+  { lat:-33.8915, lng:151.2767, area:'oceania',  country:"オーストラリア・シドニー（ボンダイ）", flag:"🇦🇺", tz:10, name:"Mia", avatar:"🇦🇺", heading:180, pitch:0,
+    intro:"Bondi Beach! 🏄 Surfers, golden sand, salt air. One of the world's most famous beaches. Fancy a swim?",
+    introJa:"ボンダイビーチです！サーファーと砂浜、潮の香り。世界で最も有名なビーチのひとつ。泳ぎたくなりますよ！" },
+  // ロンドン①テムズ川
   { lat:51.5033,  lng:-0.1196,  area:'europe',   country:"イギリス・ロンドン",        flag:"🇬🇧", tz:0,   name:"Oliver",  avatar:"🇬🇧", heading:270, pitch:0,
-    intro:"Hello from London! ☁️ On the South Bank of the Thames. Big Ben across the river. Where are you from?",
-    introJa:"ロンドンのテムズ川沿いです！対岸にビッグベンが見えます。もちろん曇りですよ（笑）" },
-  // 東京・新宿（青線確認済み）
-  { lat:35.6896,  lng:139.7006, area:'asia',     country:"日本・東京（新宿）",        flag:"🇯🇵", tz:9,   name:"Kenji",   avatar:"🇯🇵", heading:90,  pitch:0,
-    intro:"新宿からこんにちは！日本最大の駅の近く、いつも人でいっぱいです。どこから来たの？",
+    intro:"Hello from the South Bank! ☁️ Thames River, Big Ben across the water. Quintessentially London.",
+    introJa:"テムズ川サウスバンクです！対岸にビッグベン。ザ・ロンドンな景色。もちろん曇り（笑）" },
+  // ロンドン②コヴェントガーデン
+  { lat:51.5117,  lng:-0.1240,  area:'europe',   country:"イギリス・ロンドン（コヴェントガーデン）", flag:"🇬🇧", tz:0, name:"Oliver", avatar:"🇬🇧", heading:90, pitch:0,
+    intro:"Covent Garden! 🎭 Street performers, market stalls, buzzing atmosphere. Heart of London culture.",
+    introJa:"コヴェントガーデンです！大道芸人とマーケット、活気があります。ロンドン文化の中心地。" },
+  // 東京③新宿東口
+  { lat:35.6918,  lng:139.7036, area:'asia',     country:"日本・東京（新宿）",        flag:"🇯🇵", tz:9,   name:"Kenji",   avatar:"🇯🇵", heading:180, pitch:0,
+    intro:"新宿東口です！世界一利用者の多い駅のすぐそば。いつでも人でいっぱい。どこから来たの？",
+    introJa:null },
+  // 東京④浅草
+  { lat:35.7147,  lng:139.7967, area:'asia',     country:"日本・東京（浅草）",        flag:"🇯🇵", tz:9,   name:"Kenji",   avatar:"🇯🇵", heading:270, pitch:0,
+    intro:"浅草・雷門の前です！東京で最も古い街のひとつ。仲見世通りにはお土産屋さんがずらり。",
     introJa:null },
 ];
 
