@@ -978,9 +978,7 @@ html, body {
     </div>
     <div class="hud-right">
       <div class="timer-badge" id="timerBadge" style="display:none;">⏱ 30:00</div>
-      <button class="hud-btn" style="color:#4ade80;border-color:rgba(74,222,128,0.3);" onclick="showUpgrade()">🎙 ガイドと通話 <span style="font-size:9px;opacity:0.7;">PRO・近日公開</span></button>
-      <button class="hud-btn" onclick="goToHosts()">ホストを選ぶ</button>
-      <button class="hud-btn hud-btn-primary" onclick="goToHost()">ホストになる</button>
+      <button class="hud-btn" style="color:#4ade80;border-color:rgba(74,222,128,0.3);" onclick="showUpgrade()">🎙 通話 <span style="font-size:9px;opacity:0.7;">PRO</span></button>
     </div>
   </div>
 
@@ -1317,7 +1315,7 @@ let chatOpen = false;
 let greetTimeout = null;
 let greetId = 0;
 let freeChatCount = 0;      // 無料ユーザーの累計チャット回数
-const FREE_CHAT_LIMIT = 3;  // 無料は3回まで
+const FREE_CHAT_LIMIT = 5;  // 無料は5回まで
 let isPro = false;          // PROフラグ（将来的に認証と連携）
 
 function toggleChat() {
@@ -1774,7 +1772,6 @@ function showTyping() {
 }
 
 async function sendMessage(){
-  if(!sessionActive) return;
   const inp=document.getElementById('chatInput');
   const t=inp.value.trim(); if(!t) return;
 
