@@ -1770,9 +1770,7 @@ async function sendMessage(){
         addSys('🔒 別エリアへの移動はPROプランで');
         showUpgrade();
       } else {
-        const mapsUrl = placeName
-          ? `https://maps.google.com/?q=${encodeURIComponent(placeName + ' ' + currentLoc.country)}`
-          : `https://maps.google.com/?q=${lat},${lng}`;
+        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
         const label = placeName || '地図で確認';
         addSys(`📍 <a href="${mapsUrl}" target="_blank" style="color:#667eea;text-decoration:none;font-size:12px;">${label} →</a>`);
         updateStreetView(lat, lng, heading);
