@@ -1245,7 +1245,7 @@ const allLocations = [
     intro:"表参道ヒルズの前にいます🌿 おしゃれなブランドとカフェが並ぶ大人の原宿。どこから来たの？",
     introJa:null },
   // 東京②渋谷スクランブル
-  { lat:35.6601,  lng:139.6985, area:'asia',     country:"日本・東京（渋谷）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:20,  pitch:0,
+  { lat:35.6595859,lng:139.7002036,area:'asia',  country:"日本・東京（渋谷）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:98,  pitch:19, pano:"ikvuzi7_XcD9q_tpA7xoPA",
     intro:"渋谷スクランブル交差点です！世界一有名な交差点、一度に数千人が渡ります。すごくないですか？",
     introJa:null },
   // ローマ①コロッセオ
@@ -1537,8 +1537,9 @@ function loadLocation(loc) {
   const loading = document.getElementById('svLoading');
   loading.classList.remove('hidden');
 
-  iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}`
-    + `&location=${loc.lat},${loc.lng}&heading=${loc.heading||0}&pitch=${loc.pitch||0}&fov=80`;
+  iframe.src = loc.pano
+    ? `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&pano=${loc.pano}&heading=${loc.heading||0}&pitch=${loc.pitch||0}&fov=80`
+    : `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${loc.lat},${loc.lng}&heading=${loc.heading||0}&pitch=${loc.pitch||0}&fov=80`;
   iframe.onload = ()=> setTimeout(()=>loading.classList.add('hidden'), 600);
 
   document.getElementById('overlayCountry').textContent = loc.flag+'  '+loc.country;
