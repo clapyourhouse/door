@@ -1623,7 +1623,7 @@ function buildSystemPrompt(loc) {
   const now=new Date(), utc=now.getTime()+now.getTimezoneOffset()*60000;
   const local=new Date(utc+3600000*loc.tz);
   const timeStr=`${local.getHours()}:${String(local.getMinutes()).padStart(2,'0')}`;
-  return `You are ${loc.name}, a local resident of ${loc.country}.
+  return `You are ${loc.name}, a local resident of ${loc.country} (base coordinates: ${loc.lat}, ${loc.lng}).
 The user has "teleported" to your neighborhood via an app called Door — they can see your street through Street View.
 Current local time where you are: ${timeStr}.
 Your personality: warm, curious, proud of your city, slightly surprised by the visitor.
@@ -1632,7 +1632,8 @@ Rules:
 - Occasionally mention something specific and interesting about your location (food, weather, a local landmark, daily life).
 - Ask the user a question in every 2nd or 3rd message to keep the conversation going.
 - Respond in the same language the user writes in. If Japanese, reply in Japanese naturally.
-- Never break character or mention AI.`;
+- Never break character or mention AI.
+- NAVIGATION: If the user wants to go or see a specific place (e.g. "エッフェル塔に連れて行って", "カフェ見せて", "そこ行きたい"), silently append [MOVE:lat,lng,heading] at the very end of your reply with the coordinates of that place. Do not explain the tag. Only append when user explicitly asks to go/see somewhere.`;
 }
 
 async function aiGreet(loc) {
@@ -1658,10 +1659,13 @@ Respond in Japanese.`;
   if(reply) {
     addAIBubble(reply);
   } else {
-    // フォールバック：プリセットの挨拶を使う
     const fallback = loc.introJa || loc.intro;
     addAIBubble(fallback);
   }
+  // 自然なヒントを少し遅れて表示
+  setTimeout(() => {
+    addSys('💡 「〇〇に連れて行って」と言うとその場所のストリートに移動できます');
+  }, 3000);
 }
 
 async function callAI(userMessage, addToHistory=true) {
@@ -1724,11 +1728,26 @@ async function sendMessage(){
   const reply = await callAI(t);
   typing.remove();
   if(reply) {
-    addAIBubble(reply, true);
+    // [MOVE:lat,lng,heading] タグを解析してStreet Viewを更新
+    const moveMatch = reply.match(/\[MOVE:([-\d.]+),([-\d.]+),?(\d*)\]/);
+    const cleanReply = reply.replace(/\[MOVE:[^\]]+\]/g, '').trim();
+    addAIBubble(cleanReply, true);
+    if(moveMatch) {
+      const lat = parseFloat(moveMatch[1]);
+      const lng = parseFloat(moveMatch[2]);
+      const heading = parseInt(moveMatch[3]) || 0;
+      addSys('📍 移動しました');
+      updateStreetView(lat, lng, heading);
+    }
   } else {
     addAIBubble('ごめんなさい、少し聞き取れませんでした。もう一度話しかけてみてください 😊');
   }
   inp.disabled=false; inp.focus();
+}
+
+function updateStreetView(lat, lng, heading) {
+  const iframe = document.getElementById('sv-iframe');
+  iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
 }
 
 // ======= VOICE =======
