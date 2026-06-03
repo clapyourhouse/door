@@ -1208,36 +1208,18 @@ const OPENAI_KEY = ['sk-proj-lq9IHb2yM86hc-heXVDAVjOPJvzvx_5xHYYC8LUHii2rGGWQyPT
 const SESSION_MINUTES = 30;
 
 const allLocations = [
-  { lat:48.8566,  lng:2.3522,   area:'europe',   country:"フランス・パリ",          flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:60,  pitch:5,
-    intro:"Bonjour! I'm in Paris — just had my morning café. Are you traveling? 🥐",
-    introJa:"こんにちは！今パリで朝のカフェを飲んでたところです。旅行中ですか？" },
-  { lat:-33.8688, lng:151.2093, area:'oceania',  country:"オーストラリア・シドニー", flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:180, pitch:0,
-    intro:"Hey! Sydney here — just finished a surf at Bondi Beach. Wild waves today 🏄",
-    introJa:"やあ！ボンダイビーチでサーフィンしてきたとこ。今日は波がすごかった！" },
+  { lat:48.8584,  lng:2.2945,   area:'europe',   country:"フランス・パリ",          flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:80,  pitch:5,
+    intro:"Bonjour! I'm in Paris — just had my morning café near the Eiffel Tower. Are you traveling? 🥐",
+    introJa:"こんにちは！エッフェル塔の近くでカフェしてたとこ。旅行中ですか？" },
+  { lat:37.5172,  lng:127.0473, area:'asia',     country:"韓国・ソウル",            flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:120, pitch:0,
+    intro:"안녕하세요! Seoul here — in Gangnam right now 🧋 Have you ever been to Korea?",
+    introJa:"ソウルからアンニョン！江南にいます。韓国に来たことある？" },
+  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",  flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
+    intro:"NYC checking in 🗽 Times Square energy never stops. Where are you from?",
+    introJa:"NYCからこんにちは！タイムズスクエア、いつも賑やかです。どこから来たの？" },
   { lat:35.6762,  lng:139.6503, area:'asia',     country:"日本・東京",              flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:90,  pitch:5,
     intro:"こんにちは！東京から繋いでます。渋谷でお茶してます☕ どこにいるの？",
     introJa:null },
-  { lat:-23.5505, lng:-46.6333, area:'americas', country:"ブラジル・サンパウロ",    flag:"🇧🇷", tz:-3,  name:"Gabriel", avatar:"🇧🇷", heading:270, pitch:5,
-    intro:"Oi! Aqui é São Paulo. Você fala português? 😄",
-    introJa:"こんにちは！サンパウロです。ポルトガル語しゃべれる？" },
-  { lat:51.5074,  lng:-0.1278,  area:'europe',   country:"イギリス・ロンドン",      flag:"🇬🇧", tz:0,   name:"Oliver",  avatar:"🇬🇧", heading:130, pitch:5,
-    intro:"Hello from London! It's raining, obviously 🌧️ Having tea. What time is it there?",
-    introJa:"ロンドンからこんにちは！もちろん雨ですよ。紅茶飲んでます。そっちは何時？" },
-  { lat:28.5355,  lng:77.3910,  area:'asia',     country:"インド・デリー",          flag:"🇮🇳", tz:5.5, name:"Priya",   avatar:"🇮🇳", heading:90,  pitch:0,
-    intro:"Namaste from Delhi! 🙏 It's quite hot here. Have you ever been to India?",
-    introJa:"デリーからナマステ！今日はかなり暑いです。インドに来たことありますか？" },
-  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",  flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
-    intro:"NYC checking in 🗽 Just grabbed a bagel. What's Door like where you are?",
-    introJa:"NYCからこんにちは！ベーグル買ってきた。そっちのDoorはどう？" },
-  { lat:41.9028,  lng:12.4964,  area:'europe',   country:"イタリア・ローマ",        flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:310, pitch:5,
-    intro:"Ciao from Rome! 🍕 Near the Colosseum. Tourists everywhere today haha",
-    introJa:"ローマからチャオ！コロッセオの近くにいます。観光客だらけ（笑）" },
-  { lat:37.5665,  lng:126.9780, area:'asia',     country:"韓国・ソウル",            flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:150, pitch:0,
-    intro:"안녕하세요! Seoul here — just came from a café in Hongdae 🧋",
-    introJa:"ソウルからアンニョン！弘大のカフェから戻ってきたとこです。" },
-  { lat:25.2048,  lng:55.2708,  area:'middleeast',country:"UAE・ドバイ",            flag:"🇦🇪", tz:4,   name:"Fatima",  avatar:"🇦🇪", heading:0,   pitch:5,
-    intro:"Marhaba from Dubai! 🌆 The skyline here never gets old. First time visiting?",
-    introJa:"ドバイからマルハバ！このスカイラインは何度見ても飽きない。初めて来ますか？" },
 ];
 
 // ======= HOST DATA =======
@@ -1551,13 +1533,15 @@ function showSessionEnd() {
   const el = document.createElement('div');
   el.className = 'session-end-overlay';
   el.id = 'sessionEndOverlay';
+  const shareText = encodeURIComponent(`扉を開いたら${currentLoc.country}に飛ばされた🚪✨ AIガイドと話せるサービス「Door」が面白すぎた👀 #Door #どこでもドア`);
+  const shareUrl = encodeURIComponent('https://door-app.netlify.app');
   el.innerHTML = `
     <div class="session-end-card">
-      <h2>⏰ セッション終了</h2>
-      <p>${currentLoc.country}との${SESSION_MINUTES}分間、いかがでしたか？<br>続けたい場合はプレミアムへ。</p>
+      <h2>🚪 旅が終わりました</h2>
+      <p>${currentLoc.country}との${SESSION_MINUTES}分間、いかがでしたか？</p>
       <div class="session-end-btns">
-        <button class="btn-premium" onclick="extendSession()">✨ プレミアムで続ける — ¥980/月</button>
-        <p style="font-size:11px;color:#444;margin:-4px 0 4px;">ホストには¥500/セッションお支払い</p>
+        <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" style="display:block;width:100%;padding:13px;background:#1d9bf0;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;text-align:center;text-decoration:none;margin-bottom:10px;">𝕏 この体験をシェアする</a>
+        <button class="btn-premium" onclick="extendSession()">✨ PROで続ける — ¥500/月</button>
         <button class="btn-next" onclick="closeEndAndNext()">次の扉を開く →</button>
       </div>
     </div>`;
