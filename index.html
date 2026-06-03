@@ -1633,7 +1633,7 @@ Rules:
 - Ask the user a question in every 2nd or 3rd message to keep the conversation going.
 - Respond in the same language the user writes in. If Japanese, reply in Japanese naturally.
 - Never break character or mention AI.
-- NAVIGATION: If the user wants to go or see a specific place, silently append [MOVE:lat,lng,heading] at the very end of your reply. Use your knowledge to provide the most accurate GPS coordinates for that exact spot (not just the city center). heading is the compass direction to face (0=north, 90=east, 180=south, 270=west). Do not explain the tag. Only append when user explicitly asks to go/see somewhere.`;
+- NAVIGATION: If the user wants to go or see a specific place IN YOUR CITY ONLY, silently append [MOVE:lat,lng,heading] at the very end of your reply. Use precise outdoor street-level GPS coordinates (not indoor/underground). heading is compass direction (0=north,90=east,180=south,270=west). If the user asks to go somewhere outside your city, kindly say you can only show places in ${loc.country}. Do not explain the tag. Only append when user explicitly asks to go/see somewhere.`;
 }
 
 async function aiGreet(loc) {
@@ -1746,20 +1746,28 @@ async function sendMessage(){
 }
 
 function updateStreetView(lat, lng, heading) {
-  // 黒いオーバーレイで扉が閉じる→開くアニメーション
+  const iframe = document.getElementById('sv-iframe');
+  // アニメーション用スタイルをheadに追加（初回のみ）
+  if(!document.getElementById('door-anim-style')) {
+    const s = document.createElement('style');
+    s.id = 'door-anim-style';
+    s.textContent = `
+      @keyframes doorClose { 0%{opacity:0} 30%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+      .door-transition { position:fixed;inset:0;background:#0a0a0f;z-index:9999;pointer-events:none;
+        display:flex;align-items:center;justify-content:center;
+        animation: doorClose 1.6s ease forwards; }
+      .door-transition-icon { font-size:48px; animation: doorClose 1.6s ease forwards; }
+    `;
+    document.head.appendChild(s);
+  }
   const overlay = document.createElement('div');
-  overlay.style.cssText = `position:absolute;inset:0;background:#000;z-index:5;opacity:0;transition:opacity 0.5s ease;pointer-events:none;`;
+  overlay.className = 'door-transition';
+  overlay.innerHTML = '<div class="door-transition-icon">🚪</div>';
   document.body.appendChild(overlay);
-  requestAnimationFrame(() => {
-    overlay.style.opacity = '1';
-    setTimeout(() => {
-      document.getElementById('sv-iframe').src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
-      setTimeout(() => {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 500);
-      }, 800);
-    }, 500);
-  });
+  setTimeout(() => {
+    iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
+  }, 800);
+  setTimeout(() => overlay.remove(), 1700);
 }
 
 // ======= VOICE =======
