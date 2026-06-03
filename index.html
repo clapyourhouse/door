@@ -1729,8 +1729,8 @@ async function sendMessage(){
   typing.remove();
   if(reply) {
     // [MOVE:lat,lng,heading] タグを解析してStreet Viewを更新
-    const moveMatch = reply.match(/\[MOVE:([-\d.]+),([-\d.]+),?(\d*)\]/);
-    const cleanReply = reply.replace(/\[MOVE:[^\]]+\]/g, '').trim();
+    const moveMatch = reply.match(/\[?\s*MOVE\s*:\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,?\s*(\d*)\s*\]?/i);
+    const cleanReply = reply.replace(/\[?\s*MOVE\s*:\s*[-\d.,\s]+\]?/gi, '').trim();
     addAIBubble(cleanReply, true);
     if(moveMatch) {
       const lat = parseFloat(moveMatch[1]);
