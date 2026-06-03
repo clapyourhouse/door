@@ -1842,7 +1842,9 @@ async function sendMessage(){
         addSys('🔒 別エリアへの移動はPROプランで');
         showUpgrade();
       } else {
-        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+        const mapsUrl = placeName
+          ? `https://maps.google.com/?q=${lat},${lng}`
+          : `https://maps.google.com/maps/@${lat},${lng},17z`;
         const label = placeName || 'Googleマップで開く';
         addSys(`📍 <a href="${mapsUrl}" target="_blank" style="color:#667eea;text-decoration:none;font-size:12px;">${label} →</a>`);
         updateStreetView(lat, lng, heading);
