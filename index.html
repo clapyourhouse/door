@@ -1633,7 +1633,7 @@ Rules:
 - Ask the user a question in every 2nd or 3rd message to keep the conversation going.
 - Respond in the same language the user writes in. If Japanese, reply in Japanese naturally.
 - Never break character or mention AI.
-- NAVIGATION: If the user wants to go or see a specific place (e.g. "エッフェル塔に連れて行って", "カフェ見せて", "そこ行きたい"), silently append [MOVE:lat,lng,heading] at the very end of your reply with the coordinates of that place. Do not explain the tag. Only append when user explicitly asks to go/see somewhere.`;
+- NAVIGATION: If the user wants to go or see a specific place, silently append [MOVE:lat,lng,heading] at the very end of your reply. Use precise coordinates for famous landmarks. Examples: Eiffel Tower[MOVE:48.8584,2.2945,80], Arc de Triomphe[MOVE:48.8738,2.2950,180], Shibuya Crossing[MOVE:35.6595,139.7004,50], Ikebukuro Station[MOVE:35.7295,139.7109,0], Shinjuku Station[MOVE:35.6896,139.7006,90], Harajuku[MOVE:35.6702,139.7026,180], Gangnam Station[MOVE:37.4979,127.0276,90], Hongdae[MOVE:37.5563,126.9244,30], Times Square[MOVE:40.7580,-73.9855,200], Central Park[MOVE:40.7829,-73.9654,0], Colosseum[MOVE:41.8902,12.4922,0], Trevi Fountain[MOVE:41.9009,12.4833,180], Big Ben[MOVE:51.5007,-0.1246,270], Tower Bridge[MOVE:51.5055,-0.0754,90], Opera House[MOVE:−33.8568,151.2153,0]. Do not explain the tag. Only append when user explicitly asks to go/see somewhere.`;
 }
 
 async function aiGreet(loc) {
@@ -1747,7 +1747,13 @@ async function sendMessage(){
 
 function updateStreetView(lat, lng, heading) {
   const iframe = document.getElementById('sv-iframe');
-  iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
+  // 扉が閉じて開くアニメーション
+  iframe.style.transition = 'opacity 0.4s ease';
+  iframe.style.opacity = '0';
+  setTimeout(() => {
+    iframe.src = `https://www.google.com/maps/embed/v1/streetview?key=${MAPS_KEY}&location=${lat},${lng}&heading=${heading}&pitch=0&fov=90`;
+    iframe.style.opacity = '1';
+  }, 400);
 }
 
 // ======= VOICE =======
