@@ -878,6 +878,7 @@ html, body {
 <!-- ===== SCREEN 1: LANDING ===== -->
 <div class="screen" id="s-landing">
   <div class="logo">Door</div>
+  <p style="font-size:13px;color:#555;letter-spacing:0.3px;margin-bottom:32px;">扉を開くと、世界のどこかに飛ばされる</p>
   <div class="door-wrap" id="doorWrap">
     <div class="door-outer">
       <div class="door-panel" id="doorPanel">
@@ -887,7 +888,15 @@ html, body {
     </div>
   </div>
   <button class="open-btn" onclick="openDoorAndLaunch()">扉を開く</button>
-  <a class="host-link" onclick="goToHost()">あなたの街の扉を開放する — <span>ローカルガイド登録</span></a>
+  <div style="margin-top:20px;display:flex;gap:20px;font-size:11px;color:#3a3a3a;">
+    <span>🇫🇷 パリ</span>
+    <span>🇰🇷 ソウル</span>
+    <span>🇺🇸 NYC</span>
+    <span>🇯🇵 東京</span>
+    <span>🇮🇹 ローマ</span>
+    <span>+more</span>
+  </div>
+  <a class="host-link" onclick="goToHost()" style="margin-top:28px;">あなたの街の扉を開放する — <span>ガイド登録</span></a>
 </div>
 
 <!-- ===== SCREEN 2: AREA SELECT ===== -->
@@ -1208,17 +1217,29 @@ const OPENAI_KEY = ['sk-proj-lq9IHb2yM86hc-heXVDAVjOPJvzvx_5xHYYC8LUHii2rGGWQyPT
 const SESSION_MINUTES = 30;
 
 const allLocations = [
-  { lat:48.8584,  lng:2.2945,   area:'europe',   country:"フランス・パリ",          flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:80,  pitch:5,
-    intro:"Bonjour! I'm in Paris — just had my morning café near the Eiffel Tower. Are you traveling? 🥐",
-    introJa:"こんにちは！エッフェル塔の近くでカフェしてたとこ。旅行中ですか？" },
-  { lat:37.5172,  lng:127.0473, area:'asia',     country:"韓国・ソウル",            flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:120, pitch:0,
-    intro:"안녕하세요! Seoul here — in Gangnam right now 🧋 Have you ever been to Korea?",
-    introJa:"ソウルからアンニョン！江南にいます。韓国に来たことある？" },
-  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",  flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
-    intro:"NYC checking in 🗽 Times Square energy never stops. Where are you from?",
-    introJa:"NYCからこんにちは！タイムズスクエア、いつも賑やかです。どこから来たの？" },
-  { lat:35.6762,  lng:139.6503, area:'asia',     country:"日本・東京",              flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:90,  pitch:5,
-    intro:"こんにちは！東京から繋いでます。渋谷でお茶してます☕ どこにいるの？",
+  { lat:48.8584,  lng:2.2945,   area:'europe',   country:"フランス・パリ",            flag:"🇫🇷", tz:1,   name:"Lucas",   avatar:"🇫🇷", heading:80,  pitch:5,
+    intro:"Bonjour! Near the Eiffel Tower right now ☕ Are you traveling to Paris someday?",
+    introJa:"こんにちは！エッフェル塔のそばにいます。パリに来たことありますか？" },
+  { lat:37.5563,  lng:126.9244, area:'asia',     country:"韓国・ソウル（弘大）",      flag:"🇰🇷", tz:9,   name:"Jiyeon",  avatar:"🇰🇷", heading:30,  pitch:0,
+    intro:"안녕하세요! In Hongdae now — best area for cafés and music 🧋 Ever been to Seoul?",
+    introJa:"ソウルの弘大にいます！カフェと音楽の街。韓国来たことありますか？" },
+  { lat:40.7580,  lng:-73.9855, area:'americas', country:"アメリカ・ニューヨーク",    flag:"🇺🇸", tz:-5,  name:"Jordan",  avatar:"🇺🇸", heading:200, pitch:10,
+    intro:"NYC here 🗽 Times Square never sleeps. Where in the world are you?",
+    introJa:"NYCのタイムズスクエアです！世界中どこからつないでるの？" },
+  { lat:35.6595,  lng:139.7004, area:'asia',     country:"日本・東京（渋谷）",        flag:"🇯🇵", tz:9,   name:"Hana",    avatar:"🇯🇵", heading:50,  pitch:5,
+    intro:"こんにちは！渋谷のスクランブル交差点そばです☕ どこから来たの？",
+    introJa:null },
+  { lat:41.9028,  lng:12.4964,  area:'europe',   country:"イタリア・ローマ",          flag:"🇮🇹", tz:1,   name:"Sofia",   avatar:"🇮🇹", heading:310, pitch:5,
+    intro:"Ciao from Rome! 🍕 Near the Colosseum today. Have you ever been to Italy?",
+    introJa:"ローマからチャオ！コロッセオの近くにいます。イタリアに来たことある？" },
+  { lat:-33.8568, lng:151.2153, area:'oceania',  country:"オーストラリア・シドニー",  flag:"🇦🇺", tz:10,  name:"Mia",     avatar:"🇦🇺", heading:0,   pitch:5,
+    intro:"Hey from Sydney! 🦘 Near the Opera House. Beautiful day today — where are you?",
+    introJa:"シドニーからこんにちは！オペラハウスの近くです。そっちの天気はどう？" },
+  { lat:51.5007,  lng:-0.1246,  area:'europe',   country:"イギリス・ロンドン",        flag:"🇬🇧", tz:0,   name:"Oliver",  avatar:"🇬🇧", heading:270, pitch:5,
+    intro:"Hello from London! ☁️ Big Ben view today. It's raining, naturally. Where are you from?",
+    introJa:"ロンドンからこんにちは！ビッグベンが見えます。もちろん雨ですよ（笑）" },
+  { lat:35.6586,  lng:139.7454, area:'asia',     country:"日本・東京（六本木）",      flag:"🇯🇵", tz:9,   name:"Kenji",   avatar:"🇯🇵", heading:180, pitch:0,
+    intro:"六本木からこんにちは！夜景がきれいな場所ですよ。どこから来たの？",
     introJa:null },
 ];
 
@@ -1533,7 +1554,7 @@ function showSessionEnd() {
   const el = document.createElement('div');
   el.className = 'session-end-overlay';
   el.id = 'sessionEndOverlay';
-  const shareText = encodeURIComponent(`扉を開いたら${currentLoc.country}に飛ばされた🚪✨ AIガイドと話せるサービス「Door」が面白すぎた👀 #Door #どこでもドア`);
+  const shareText = encodeURIComponent(`扉を開いたら${currentLoc.country}に飛んだ🚪\nその場の街並みを見ながら現地のガイドと話せるの、なにこれ面白すぎ\n#Door`);
   const shareUrl = encodeURIComponent('https://door-app.netlify.app');
   el.innerHTML = `
     <div class="session-end-card">
