@@ -5,8 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#171a14">
 <title>Door — Tokyo & beyond</title>
-<link rel="stylesheet" href="style.css">
-<script src="app.js" defer></script>
+<style>
+:root{color-scheme:light;--ink:#202219;--paper:#f3f0e7;--muted:#595a4e;--lime:#e3f09a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "DM Sans",system-ui,sans-serif}
+a{color:inherit}header,main,footer{max-width:1072px;margin:auto;padding-inline:24px}
+header{height:72px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:31px;font-weight:850;letter-spacing:-.08em;text-decoration:none}.brand span{color:#63752a}
+nav{display:flex;gap:20px;font-size:14px;font-weight:650}nav a{text-decoration:none}
+.hero{overflow:hidden;border-radius:28px;background:#202820;isolation:isolate;color:#fff;position:relative;min-height:470px;display:flex;align-items:end}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#131a16ed,#141a1699 55%,#141a1633),url('https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1400&q=82') center 55%/cover}
+.cover{padding:clamp(24px,6vw,72px);max-width:620px}small{font-size:11px;letter-spacing:.15em;font-weight:800}.cover small{color:var(--lime)}
+h1,h2,h3,p{margin:0}h1,h2{font-family:Georgia,serif;font-weight:400;letter-spacing:-.055em}h1{font-size:clamp(54px,8vw,105px);line-height:.94;margin:15px 0 20px}h2{font-size:clamp(33px,5vw,52px);line-height:1.03;margin:6px 0 12px}.cover p{max-width:365px;margin-bottom:24px;color:#f0f0e7}
+.button,.send{background:var(--lime);color:#191e11;border:0;font-weight:750}.button{display:inline-flex;gap:24px;padding:13px 18px;border-radius:10px;text-decoration:none}
+.panel{margin:22px 0;padding:clamp(18px,5vw,48px);background:#fffdf6;border:1px solid #dfded2;border-radius:24px;scroll-margin-top:16px}
+.section-head{display:flex;justify-content:space-between;align-items:start;gap:8px}.tag{border:1px solid #d5d4c8;padding:4px 9px;border-radius:99px;font-size:11px}.muted{color:var(--muted);margin-bottom:17px}
+button,input,select{font:inherit}button,select{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #67802d;outline-offset:3px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.chips button{background:#efeee4;border:0;border-radius:24px;padding:9px 13px;font-size:13px;font-weight:650}.compose{display:flex;gap:8px;margin-top:5px}input,select{min-width:0;flex:1;padding:11px;border:1px solid #cccdbd;border-radius:10px;background:#fff;color:var(--ink)}label{font-size:13px;font-weight:750}.send{padding:10px 14px;border-radius:10px;white-space:nowrap;font-size:14px}
+#conversation:empty{display:none}.message{padding:12px 15px;margin:8px 0;border-radius:12px;background:#eeeee2;overflow-wrap:anywhere}.message strong{display:block;font-size:12px;margin-bottom:3px}.message.ask{background:#e6edcd}.compass{font-size:38px;color:#667942}.explore{background:#e8ebdc}#place{margin-top:18px}#place a{display:inline-block;margin:8px 0}iframe{width:100%;height:300px;border:0;border-radius:14px}details{margin-top:8px}summary{cursor:pointer;font-weight:700}footer{padding-block:12px 30px;color:var(--muted);font-size:13px}.sr{position:absolute;clip-path:inset(50%)}[hidden]{display:none!important}
+@media(max-width:520px){header,main,footer{padding-inline:14px}header{height:62px}.hero{min-height:405px;border-radius:21px}nav{gap:13px}.cover{padding:24px}.panel{border-radius:19px}.send{padding-inline:9px}}
+
+</style>
+
 </head>
 <body>
 <header><a class="brand" href="#home">Door<span>.</span></a><nav><a href="#ask">Tokyo help</a><a href="#explore">Explore ↗</a></nav></header>
@@ -29,5 +50,67 @@
 </section>
 </main>
 <footer>Door · Tokyo &amp; beyond</footer>
+<script>
+const examples = {
+  arrival: ['I land at Haneda late. What should I check first?', 'Check your arrival terminal and the last airport train or bus for your date before choosing a hotel. How late do you land, and which area are you staying in?'],
+  rain: ['It’s raining. What can I do this afternoon?', 'Start with one indoor stop near where you already are. Around Ueno, look at the museums and check opening hours before you go. Which neighborhood are you in?'],
+  stay: ['Where should I stay on my first trip?', 'Start with the places you plan to visit and your airport route. Ueno, Shinjuku and Tokyo Station give you different connections. What are your first two stops?']
+};
+const question = document.querySelector('#question');
+const conversation = document.querySelector('#conversation');
+
+function addMessage(speaker, value, className) {
+  const message = document.createElement('div');
+  message.className = 'message ' + className;
+  const label = document.createElement('strong');
+  label.textContent = speaker;
+  message.append(label, document.createTextNode(value));
+  conversation.append(message);
+}
+
+document.querySelectorAll('[data-topic]').forEach(button => {
+  button.addEventListener('click', () => {
+    question.value = examples[button.dataset.topic][0];
+    question.focus();
+  });
+});
+
+document.querySelector('#trip').addEventListener('submit', event => {
+  event.preventDefault();
+  const value = question.value.trim();
+  if (!value) return;
+  const example = Object.values(examples).find(([prompt]) => value === prompt);
+  addMessage('You', value, 'ask');
+  addMessage('Door · sample reply', example?.[1] || 'Live replies are unavailable in this preview. Choose one of the sample questions above to see how the conversation works.', '');
+  question.value = '';
+});
+
+const places = [
+  { name: 'Shibuya, Tokyo', region: 'Asia', point: '35.6595,139.7005', guide: 'Start at the crossing, then look for the side streets leading toward Center Gai.' },
+  { name: 'Colosseum, Rome', region: 'Europe', point: '41.8902,12.4922', guide: 'Look along Via dei Fori Imperiali to see how the Colosseum sits next to the ancient forums.' },
+  { name: 'Arc de Triomphe, Paris', region: 'Europe', point: '48.8738,2.295', guide: 'Turn down the Champs-Élysées to see the long avenue stretching toward central Paris.' },
+  { name: 'Times Square, New York', region: 'Americas', point: '40.758,-73.9855', guide: 'Find the red steps and look south to take in the busiest stretch of the square.' }
+];
+let currentPlace;
+document.querySelector('#random').addEventListener('click', () => {
+  const region = document.querySelector('#region').value;
+  const pool = places.filter(place => !region || place.region === region);
+  const available = pool.length > 1 ? pool.filter(place => place !== currentPlace) : pool;
+  currentPlace = available[Math.floor(Math.random() * available.length)];
+  document.querySelector('#place').hidden = false;
+  document.querySelector('#destination').textContent = currentPlace.name;
+  document.querySelector('#guide').textContent = currentPlace.guide;
+  const link = document.querySelector('#street-view');
+  link.href = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + encodeURIComponent(currentPlace.point);
+  const mapsKey = document.querySelector('meta[name="door-maps-embed-key"]')?.content;
+  if (mapsKey) {
+    const panorama = document.querySelector('#panorama');
+    const params = new URLSearchParams({ key: mapsKey, location: currentPlace.point });
+    panorama.src = 'https://www.google.com/maps/embed/v1/streetview?' + params;
+    panorama.hidden = false;
+  }
+});
+
+</script>
 </body>
 </html>
