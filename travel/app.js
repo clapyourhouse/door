@@ -169,7 +169,9 @@ let busy = false;
 let humanMode = false;
 let history = []; // {role, content} for the current city
 let quota = { kind: 'free', left: DEMO ? DEMO_FREE_LIMIT : null };
-let lang = store.get(LANG_KEY) || ((navigator.language || 'en').toLowerCase().startsWith('ja') ? 'ja' : 'en');
+const langParam = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+let lang = (langParam === 'ja' || langParam === 'en') ? langParam
+  : (store.get(LANG_KEY) || ((navigator.language || 'en').toLowerCase().startsWith('ja') ? 'ja' : 'en'));
 let demoFreeUsed = 0;
 let pollTimer = null;
 let tick = 0;
@@ -573,3 +575,16 @@ window.addEventListener('DOMContentLoaded', () => {
   if (!DEMO) ensureSession().then(() => { track('land_view'); if (justPaid) track('pass_return'); pollReplies(); }).catch(() => {});
 });
 Object.assign(window, { openDoorAndLaunch, nextDoor, toggleChat, sendMessage, toggleHuman, toggleLang, pollReplies, submitSurvey, closeSurvey, buildCheckoutUrl, loadStaff, CFG });
+
+// Phones: keep the chat drawer above the on-screen keyboard and stop the page from drifting.
+(function () {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const sync = () => {
+    const kb = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    document.documentElement.style.setProperty('--kb', kb + 'px');
+    if (kb > 0) window.scrollTo(0, 0);
+  };
+  vv.addEventListener('resize', sync);
+  vv.addEventListener('scroll', sync);
+})();

@@ -908,12 +908,17 @@ html, body {
 button.hud-btn { font-family:inherit; }
 @media (max-width: 640px) {
   /* Phone: give the street view most of the screen; keep the chat compact. */
-  .chat-panel { height: 38dvh; }
+  .chat-panel { height: 38dvh; bottom: var(--kb, 0px); }
+  .hud-top { justify-content: flex-end; gap: 8px; }
+  .hud-center { display: none; }
+  .hud-right { order: 1; }
+  .hud-left { order: 2; }
+  #mapsLink { display: none; }
   .sv-overlay { transition: bottom .35s cubic-bezier(0.4,0,0.2,1); padding: 8px 12px; min-width: 0; }
   .sv-overlay .coords { display: none; }
   .sv-overlay .country { font-size: 13px; margin-bottom: 2px; }
   .sv-overlay .local-time { font-size: 10px; margin-top: 2px; }
-  #s-app.drawer-open .sv-overlay { bottom: calc(38dvh + 8px); }
+  #s-app.drawer-open .sv-overlay { bottom: calc(38dvh + 8px + var(--kb, 0px)); }
   .chat-panel-header { padding: 4px 14px 6px; gap: 8px; }
   .chat-panel-header::before { margin-bottom: 6px; }
   .chat-panel .avatar { width: 28px; height: 28px; min-width: 28px; font-size: 14px; }
@@ -926,7 +931,8 @@ button.hud-btn { font-family:inherit; }
   .chat-actions { padding: 2px 12px 0; font-size: 10px; }
   .human-btn { padding: 3px 10px; font-size: 10px; }
   .chat-input-wrap { padding: 6px 12px max(8px, env(safe-area-inset-bottom)); }
-  .chat-input { padding: 7px 12px; font-size: 13px; }
+  .chat-input { padding: 7px 12px; font-size: 16px; }
+  .survey-card select, .survey-card textarea, .survey-card input[type=email] { font-size: 16px; }
   .send-btn { width: 30px; height: 30px; min-width: 30px; }
 }
 </style>
