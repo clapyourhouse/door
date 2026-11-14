@@ -588,3 +588,21 @@ Object.assign(window, { openDoorAndLaunch, nextDoor, toggleChat, sendMessage, to
   vv.addEventListener('resize', sync);
   vv.addEventListener('scroll', sync);
 })();
+
+/* Phone: swipe down on (or tap) the chat header to close it. Also stops the browser's pull-to-refresh from reloading the app. */
+(function () {
+  const hd = document.querySelector('.chat-panel-header');
+  if (!hd) return;
+  let y0 = null;
+  hd.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });
+  hd.addEventListener('touchmove', e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  hd.addEventListener('touchend', e => {
+    if (y0 === null) return;
+    const dy = e.changedTouches[0].clientY - y0; y0 = null;
+    if (dy > 30 && window.innerWidth <= 640) { document.activeElement && document.activeElement.blur(); if (!get('chatPanel').classList.contains('hidden')) toggleChat(); }
+  }, { passive: true });
+  hd.addEventListener('click', e => {
+    if (window.innerWidth > 640 || e.target.closest('button')) return;
+    if (!get('chatPanel').classList.contains('hidden')) toggleChat();
+  });
+})();
