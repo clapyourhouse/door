@@ -12,7 +12,7 @@ function message(text, sender) {
   const row = document.createElement('div');
   row.className = sender ? 'msg me' : 'msg';
   const bubble = document.createElement('div');
-  bubble.className = 'bubble';
+  bubble.className = 'msg-bubble';
   bubble.textContent = text;
   row.append(bubble);
   get('messages').append(row);
