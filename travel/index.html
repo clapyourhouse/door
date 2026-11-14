@@ -888,7 +888,9 @@ html, body {
 .chat-panel.human-mode .chat-input { border-color:rgba(227,240,154,0.5); }
 .chat-panel.human-mode .send-btn { background:linear-gradient(135deg,#e3f09a,#b8c94a); }
 .chat-panel.human-mode .send-btn svg { fill:#222; }
-.staff-row { padding:6px 14px 0; font-size:11px; }
+.staff-row { padding:2px 0 0; font-size:11px; }
+.chat-actions:has(.quota:empty) { display:none; }
+.chat-panel-header .human-btn { flex-shrink:0; white-space:nowrap; }
 .staff.on { color:#7fdc8a; }
 .staff.off { color:#999; }
 .msg.me.to-human .msg-bubble { border:1px solid rgba(227,240,154,0.35); }
@@ -927,7 +929,7 @@ button.hud-btn { font-family:inherit; }
   .messages { padding: 8px 12px; gap: 8px; }
   .msg-bubble { font-size: 12.5px; line-height: 1.5; padding: 7px 11px; }
   .msg.sys .msg-bubble { font-size: 11px; }
-  .staff-row { padding: 3px 12px 0; font-size: 10px; }
+  .staff-row { padding: 1px 0 0; font-size: 10px; }
   .chat-actions { padding: 2px 12px 0; font-size: 10px; }
   .human-btn { padding: 3px 10px; font-size: 10px; }
   .chat-input-wrap { padding: 6px 12px max(8px, env(safe-area-inset-bottom)); }
@@ -992,14 +994,14 @@ button.hud-btn { font-family:inherit; }
       <div style="flex:1;min-width:0;">
         <div class="chat-name" id="chatName">マッチング中...</div>
         <div class="chat-sub" id="chatSub">接続しています</div>
+        <div class="staff-row"><span class="staff off" id="staffBadge"></span></div>
       </div>
+      <button class="human-btn" id="humanBtn" onclick="toggleHuman()">人に聞く</button>
       <button class="chat-toggle-btn" onclick="toggleChat()" id="chatToggleBtn">✕</button>
     </div>
     <div class="messages" id="messages"></div>
-    <div class="staff-row"><span class="staff off" id="staffBadge"></span></div>
     <div class="chat-actions">
       <span class="quota" id="quota"></span>
-      <button class="human-btn" id="humanBtn" onclick="toggleHuman()">人に聞く</button>
     </div>
     <div class="chat-input-wrap">
       <input class="chat-input" id="chatInput" placeholder="日本やこの街について質問…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendMessage()"/>
