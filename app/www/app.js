@@ -44,3 +44,20 @@ document.querySelector('#remove').addEventListener('click', () => {
     status.textContent = 'The draft could not be deleted.';
   }
 });
+
+const places = [
+  { name: 'Shibuya, Tokyo', latitude: 35.6595, longitude: 139.7005 },
+  { name: 'Colosseum, Rome', latitude: 41.8902, longitude: 12.4922 },
+  { name: 'Arc de Triomphe, Paris', latitude: 48.8738, longitude: 2.295 },
+  { name: 'Times Square, New York', latitude: 40.758, longitude: -73.9855 }
+];
+let currentPlace;
+document.querySelector('#random').addEventListener('click', () => {
+  const available = places.filter(place => place !== currentPlace);
+  currentPlace = available[Math.floor(Math.random() * available.length)];
+  document.querySelector('#destination').textContent = currentPlace.name;
+  const link = document.querySelector('#street-view');
+  link.href = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='
+    + encodeURIComponent(currentPlace.latitude + ',' + currentPlace.longitude);
+  link.hidden = false;
+});
