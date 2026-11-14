@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eff2e9">
+<title>Door Travel</title>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<main>
+<header><strong>Door Travel</strong><span>Private prototype</span></header>
+<h1>A local question about Tokyo?</h1>
+<p>Prepare a question about a real decision on your trip.</p>
+<form id="trip">
+<label for="question">Your question</label>
+<textarea id="question" required maxlength="1000" rows="5" placeholder="I arrive at Haneda late. What should I check before choosing a hotel?"></textarea>
+<button>Save draft on this device</button>
+</form>
+<p id="status" role="status"></p>
+<section id="draft" hidden>
+<h2>Saved question</h2>
+<p id="saved"></p>
+<button type="button" id="remove">Delete draft</button>
+</section>
+<p class="note">This prototype saves one draft on your device. It does not send questions or provide answers yet.</p>
+</main>
+</body>
+</html>
