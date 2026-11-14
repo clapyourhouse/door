@@ -9,3 +9,17 @@ textarea { display: block; width: 100%; margin: .5rem 0 1rem; padding: 14px; bor
 button { background: #194d3c; color: white; border: 0; border-radius: 10px; padding: 12px 16px; font: inherit; cursor: pointer; }
 #draft { padding: 16px; background: #fff; border-radius: 12px; }
 #saved { white-space: pre-wrap; overflow-wrap: anywhere; }
+body { background:#111923; color:#f8f2e8; }
+header { padding-bottom:20px; }
+header strong { letter-spacing:.32em; }
+a { color:#ffd4a8; }
+.hero { padding:clamp(28px,7vw,52px); border-radius:24px; background:radial-gradient(ellipse at 95% 15%,#a75237 0%,transparent 55%),linear-gradient(155deg,#332738,#17252f 76%); }
+.hero span { letter-spacing:.18em; font-size:.75rem; color:#ffd4a8; }
+.hero h1 { margin:1.3rem 0 1rem; }
+.cta { display:inline-block; margin-top:12px; }
+form, #explore { padding:20px; background:#1c2834; border-radius:16px; }
+label { margin-top:0; }
+button { background:#ffd4a8; color:#222026; }
+.note { color:#c8c4c5; }
+#draft { color:#142b26; }
+select { padding:8px; margin:8px 12px 8px 0; font:inherit; }

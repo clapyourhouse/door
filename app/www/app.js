@@ -46,14 +46,16 @@ document.querySelector('#remove').addEventListener('click', () => {
 });
 
 const places = [
-  { name: 'Shibuya, Tokyo', latitude: 35.6595, longitude: 139.7005 },
-  { name: 'Colosseum, Rome', latitude: 41.8902, longitude: 12.4922 },
-  { name: 'Arc de Triomphe, Paris', latitude: 48.8738, longitude: 2.295 },
-  { name: 'Times Square, New York', latitude: 40.758, longitude: -73.9855 }
+  { name: 'Shibuya, Tokyo', region: 'Asia', latitude: 35.6595, longitude: 139.7005 },
+  { name: 'Colosseum, Rome', region: 'Europe', latitude: 41.8902, longitude: 12.4922 },
+  { name: 'Arc de Triomphe, Paris', region: 'Europe', latitude: 48.8738, longitude: 2.295 },
+  { name: 'Times Square, New York', region: 'Americas', latitude: 40.758, longitude: -73.9855 }
 ];
 let currentPlace;
 document.querySelector('#random').addEventListener('click', () => {
-  const available = places.filter(place => place !== currentPlace);
+  const region = document.querySelector('#region').value;
+  const pool = places.filter(place => !region || place.region === region);
+  const available = pool.length > 1 ? pool.filter(place => place !== currentPlace) : pool;
   currentPlace = available[Math.floor(Math.random() * available.length)];
   document.querySelector('#destination').textContent = currentPlace.name;
   const link = document.querySelector('#street-view');
