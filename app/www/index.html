@@ -3,34 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#eff2e9">
-<title>Door Travel</title>
+<meta name="theme-color" content="#171a14">
+<title>Door — Tokyo & beyond</title>
 <link rel="stylesheet" href="style.css">
 <script src="app.js" defer></script>
 </head>
 <body>
-<main>
-<header><strong>DOOR</strong><a href="#explore">Explore the world ↗</a></header><div class="hero"><span>JAPAN · TOKYO</span><h1>Tokyo, with someone to ask.</h1><p>From your first train to your last night in town, start with the question on your mind.</p><a class="cta" href="#trip">Write a travel question ↓</a></div>
-<h2>Your Tokyo question</h2>
-<form id="trip">
-<label for="question">Your question</label>
-<textarea id="question" required maxlength="1000" rows="5" placeholder="I arrive at Haneda late. What should I check before choosing a hotel?"></textarea>
-<button>Save draft on this device</button>
-</form>
-<p id="status" role="status"></p>
-<section id="draft" hidden>
-<h2>Saved question</h2>
-<p id="saved"></p>
-<button type="button" id="remove">Delete draft</button>
+<header><a class="brand" href="#home">Door<span>.</span></a><nav><a href="#ask">Tokyo help</a><a href="#explore">Explore ↗</a></nav></header>
+<main id="home">
+<section class="hero">
+<div class="cover"><small>JAPAN / TOKYO</small><h1>Tokyo is<br>yours to open.</h1><p>First train, last orders, or a change of plans. Start with the question on your mind.</p><a class="button" href="#ask">Ask about Tokyo <span>↘</span></a></div>
 </section>
-<p class="note">Preview · Your draft stays on this device. Live replies are unavailable.</p>
-<section id="explore">
-<h2>Explore another city</h2>
-<p>Pick a region and open a door to a surprise destination.</p><label for="region">Region</label><select id="region"><option value="">Anywhere</option><option>Asia</option><option>Europe</option><option>Americas</option></select>
-<button type="button" id="random">Open a random door</button>
-<p id="destination" aria-live="polite"></p>
-<a id="street-view" target="_blank" rel="noopener noreferrer" hidden>Open Google Street View</a>
+<section class="panel" id="ask">
+<div class="section-head"><div><small>TOKYO TRIP HELP</small><h2>What’s on your mind?</h2></div><span class="tag">Preview</span></div>
+<p class="muted">Try a sample conversation. Your messages stay on this page and are cleared when you reload.</p>
+<div class="chips"><button type="button" data-topic="arrival">Late arrival</button><button type="button" data-topic="rain">Rainy day</button><button type="button" data-topic="stay">Where to stay</button></div>
+<div id="conversation" role="log" aria-label="Sample Tokyo conversation"></div>
+<form id="trip"><label for="question">Your travel question</label><div class="compose"><input id="question" required maxlength="500" placeholder="I land at Haneda late…"><button class="send">Try question <span aria-hidden="true">↑</span></button></div></form>
+</section>
+<section class="panel explore" id="explore">
+<div class="section-head"><div><small>THE ORIGINAL DOOR</small><h2>Open another door.</h2></div><span class="compass" aria-hidden="true">✳</span></div>
+<p class="muted">Choose a region and see where you land.</p>
+<div class="compose"><label class="sr" for="region">Region</label><select id="region"><option value="">Anywhere</option><option>Asia</option><option>Europe</option><option>Americas</option></select><button id="random" class="send">Surprise me ↗</button></div>
+<div id="place" hidden><h3 id="destination" aria-live="polite"></h3><iframe id="panorama" title="Street View panorama" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen hidden></iframe><a id="street-view" target="_blank" rel="noopener noreferrer">Open Google Street View ↗</a><details><summary>Meet the city guide</summary><p id="guide"></p><small>Sample guide introduction</small></details></div>
 </section>
 </main>
+<footer>Door · Tokyo &amp; beyond</footer>
 </body>
 </html>
