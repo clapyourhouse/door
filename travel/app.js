@@ -62,8 +62,8 @@ const I18N = {
     pay_yes: '使いたい',
     pay_maybe: '内容による',
     pay_no: '使わない',
-    surveyEmail: 'メール（任意。Androidテスターは、Googleアカウントのメール）',
-    surveyAndroid: 'Android版のテストに協力する（Googleアカウントのメールが必要）',
+    surveyEmail: 'Googleアカウントのメール（Android版のテスト用）',
+    surveyAndroid: 'Android版のテストに協力する',
     surveySend: '送信',
     surveyLater: 'あとで',
     surveyNeedEmail: 'テスト協力には、Googleアカウントのメールアドレスを入力してください。',
@@ -123,8 +123,8 @@ const I18N = {
     pay_yes: 'Yes',
     pay_maybe: 'Depends',
     pay_no: 'No',
-    surveyEmail: 'Email (optional; for Android testers, your Google account email)',
-    surveyAndroid: 'Help test the Android app (Google account email required)',
+    surveyEmail: 'Google account email (for Android testing)',
+    surveyAndroid: 'Help test the Android app',
     surveySend: 'Send',
     surveyLater: 'Later',
     surveyNeedEmail: 'Please enter your Google account email to help with testing.',
@@ -397,10 +397,12 @@ function maybeSurvey(delay) {
 
 function closeSurvey() { get('survey').classList.add('hidden'); }
 
+function toggleSvEmail() { get('svEmailWrap').classList.toggle('hidden', !get('svAndroid').checked); }
+
 async function submitSurvey() {
   const val = id => get(id).value.trim();
-  const email = val('svEmail');
   const tester = get('svAndroid').checked;
+  const email = tester ? val('svEmail') : '';
   const err = get('svError');
   err.textContent = '';
   if ((tester && !email) || (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))) { err.textContent = t().surveyNeedEmail; return; }
@@ -590,7 +592,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadStaff();
   if (!DEMO) ensureSession().then(() => { track('land_view'); if (justPaid) track('pass_return'); pollReplies(); }).catch(() => {});
 });
-Object.assign(window, { openDoorAndLaunch, nextDoor, toggleChat, sendMessage, toggleHuman, toggleLang, pollReplies, submitSurvey, closeSurvey, buildCheckoutUrl, loadStaff, CFG });
+Object.assign(window, { openDoorAndLaunch, nextDoor, toggleChat, sendMessage, toggleHuman, toggleLang, pollReplies, submitSurvey, closeSurvey, toggleSvEmail, onChatKey, buildCheckoutUrl, loadStaff, CFG });
 
 // Phones: keep the chat drawer above the on-screen keyboard and stop the page from drifting.
 (function () {
@@ -622,3 +624,16 @@ Object.assign(window, { openDoorAndLaunch, nextDoor, toggleChat, sendMessage, to
     if (!get('chatPanel').classList.contains('hidden')) toggleChat();
   });
 })();
+
+/* Chat input: Enter sends, but not while an IME (e.g. Japanese) is still converting text. */
+let imeEndAt = 0;
+(function () {
+  const inp = document.getElementById('chatInput');
+  if (!inp) return;
+  inp.addEventListener('compositionend', () => { imeEndAt = Date.now(); });
+})();
+function onChatKey(e) {
+  if (e.key !== 'Enter') return;
+  if (e.isComposing || e.keyCode === 229 || Date.now() - imeEndAt < 80) return;
+  sendMessage();
+}

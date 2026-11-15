@@ -78,6 +78,7 @@ html, body {
 .legal-links { position: absolute; left: 0; right: 0; bottom: max(14px, env(safe-area-inset-bottom)); display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; padding: 0 12px; font-size: 11px; }
 .legal-links a, .survey-legal a { color: #7a86b0; text-decoration: none; }
 .legal-links a:hover, .survey-legal a:hover { text-decoration: underline; }
+.sv-email.hidden { display: none; }
 .survey-legal { margin: 10px 0 0; font-size: 11px; color: #888; line-height: 1.7; }
 
 .host-link {
@@ -1015,7 +1016,7 @@ button.hud-btn { font-family:inherit; }
       <span class="quota" id="quota"></span>
     </div>
     <div class="chat-input-wrap">
-      <input class="chat-input" id="chatInput" placeholder="日本やこの街について質問…" enterkeyhint="send" onkeydown="if(event.key==='Enter')sendMessage()"/>
+      <input class="chat-input" id="chatInput" placeholder="日本やこの街について質問…" enterkeyhint="send" onkeydown="onChatKey(event)"/>
       <button class="send-btn" onclick="sendMessage()">
         <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
       </button>
@@ -1049,9 +1050,11 @@ button.hud-btn { font-family:inherit; }
       <option value="maybe" data-i18n="pay_maybe">内容による</option>
       <option value="no" data-i18n="pay_no">使わない</option>
     </select>
-    <label data-i18n="surveyEmail">メール（任意。Androidテスターは、Googleアカウントのメール）</label>
-    <input id="svEmail" type="email" maxlength="200" autocomplete="email"/>
-    <label class="survey-check"><input id="svAndroid" type="checkbox"/> <span data-i18n="surveyAndroid">Android版のテストに協力する（Googleアカウントのメールが必要）</span></label>
+    <label class="survey-check"><input id="svAndroid" type="checkbox" onchange="toggleSvEmail()"/> <span data-i18n="surveyAndroid">Android版のテストに協力する</span></label>
+    <div id="svEmailWrap" class="sv-email hidden">
+      <label data-i18n="surveyEmail">Googleアカウントのメール（Android版のテスト用）</label>
+      <input id="svEmail" type="email" maxlength="200" autocomplete="email"/>
+    </div>
     <p class="survey-legal"><span data-i18n="surveyConsent">送信すると、次の内容に同意したものとみなします：</span> <a data-legal="privacy.html" href="privacy.html" target="_blank" rel="noopener" data-i18n="legalPrivacy">プライバシーポリシー</a></p>
     <div class="survey-error" id="svError"></div>
     <div class="survey-actions">
