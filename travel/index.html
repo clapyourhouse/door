@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Door — 日本の扉</title>
+<title>Doorizon — 日本の扉</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -108,9 +108,12 @@ html, body {
 
 
 /* 着地の演出：ピントが合う → 地名が浮かぶ → 画面の部品が、あとから入る */
-.arrival { position: absolute; top: 0; left: 0; bottom: 0; right: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 4; pointer-events: none; opacity: 0; text-align: center; color: #fff; text-shadow: 0 2px 28px rgba(0,0,0,0.6); padding: 0 24px; }
-.arrival-name { font-size: clamp(30px, 6.5vw, 68px); font-weight: 300; letter-spacing: 0.14em; }
-.arrival-sub { font-size: 12px; letter-spacing: 0.5em; opacity: 0.85; }
+.arrival { position: absolute; top: 0; left: 0; bottom: 0; right: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 4; pointer-events: none; opacity: 0; text-align: center; color: #fff; padding: 0 24px; }
+/* 明るい街でも読めるように、文字の後ろに、薄い暗い膜を敷く */
+.arrival::before { content: ''; position: absolute; left: 50%; top: 50%; width: min(92%, 760px); height: 280px; transform: translate(-50%, -50%); z-index: -1;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.36) 0%, rgba(0,0,0,0.18) 42%, rgba(0,0,0,0) 78%); filter: blur(14px); }
+.arrival-name { font-size: clamp(30px, 6.5vw, 68px); font-weight: 400; letter-spacing: 0.14em; text-shadow: 0 1px 2px rgba(0,0,0,0.65), 0 2px 14px rgba(0,0,0,0.6), 0 0 36px rgba(0,0,0,0.4); }
+.arrival-sub { font-size: 13px; font-weight: 500; letter-spacing: 0.5em; opacity: 0.95; text-shadow: 0 1px 2px rgba(0,0,0,0.6), 0 1px 10px rgba(0,0,0,0.5); }
 .arrival.show { animation: arrivalName 3.4s ease both; }
 @keyframes arrivalName { 0% { opacity: 0; transform: translateY(12px); } 22% { opacity: 1; transform: none; } 68% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-10px); } }
 #sv-iframe.focus-pull { animation: focusPull var(--fp, 1.4s) cubic-bezier(0.2, 0.6, 0.2, 1) backwards; }
@@ -1003,7 +1006,7 @@ button.hud-btn { font-family:inherit; }
 <body>
 
 <div class="screen" id="s-landing">
-  <div class="logo">Door</div>
+  <div class="logo">Doorizon</div>
   <p data-i18n="tagline" style="font-size:13px;color:#555;letter-spacing:0.3px;margin-bottom:32px;">扉を開くと、日本のどこかへ。</p>
   <div class="door-wrap" id="doorWrap">
     <div class="door-outer">
@@ -1037,7 +1040,7 @@ button.hud-btn { font-family:inherit; }
       <button class="next-door-btn" data-i18n="move" onclick="goNext()">移動する →</button>
     </div>
     <div class="hud-center">
-      <span class="hud-logo">DOOR</span>
+      <span class="hud-logo">DOORIZON</span>
     </div>
     <div class="hud-right">
       <div class="timer-badge" id="timerBadge" style="display:none;">⏱ 30:00</div>
@@ -1088,7 +1091,7 @@ button.hud-btn { font-family:inherit; }
 <div class="survey hidden" id="survey" role="dialog" aria-modal="true">
   <div class="survey-card">
     <h3 data-i18n="surveyTitle">3つだけ教えてください</h3>
-    <p class="survey-lead" data-i18n="surveyLead">Door Travelをよくするためのアンケートです。</p>
+    <p class="survey-lead" data-i18n="surveyLead">Doorizonをよくするためのアンケートです。</p>
     <label data-i18n="surveyQ1">日本への旅行は？</label>
     <select id="svTrip">
       <option value="planning" data-i18n="trip_planning">これから行く予定</option>
