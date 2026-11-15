@@ -449,21 +449,21 @@ function openDoorAndLaunch() {
   track('door_open');
   const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const landing = get('s-landing');
+  // 街の映像は、扉の奥で先に読み込む（扉が広がったときには、もう映像が出ている）
+  const app = get('s-app');
+  app.classList.remove('gone');
+  app.classList.add('visible');
+  app.style.display = 'flex';
+  nextDoor();
+  startPolling();
   landing.classList.add('entering');
   get('doorPanel').classList.add('open');
-  get('doorGlow').classList.add('show');
-  get('doorLight').classList.add('on');
-  if (!reduce) get('doorWrap').classList.add('zoom');
-  setTimeout(() => {
-    const app = get('s-app');
-    app.classList.remove('gone');
-    app.classList.add('visible');
-    app.style.display = 'flex';
-    nextDoor();
-    startPolling();
-    landing.classList.add('fadeout');
-    setTimeout(() => landing.classList.add('gone'), 750);
-  }, reduce ? 700 : 1750);
+  if (reduce) {
+    setTimeout(() => { landing.classList.add('fadeout'); setTimeout(() => landing.classList.add('gone'), 750); }, 900);
+    return;
+  }
+  get('doorWrap').classList.add('zoom');
+  setTimeout(() => landing.classList.add('gone'), 2100);
 }
 
 function toggleChat() {
