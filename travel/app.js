@@ -67,7 +67,11 @@ const I18N = {
     surveySend: '送信',
     surveyLater: 'あとで',
     surveyNeedEmail: 'テスト協力には、Googleアカウントのメールアドレスを入力してください。',
-    surveyThanks: 'ありがとうございます。いただいた内容は、改善に使います。'
+    surveyThanks: 'ありがとうございます。いただいた内容は、改善に使います。',
+    surveyConsent: '送信すると、次の内容に同意したものとみなします：',
+    legalPrivacy: 'プライバシーポリシー',
+    legalTerms: '利用規約',
+    legalTokusho: '特定商取引法に基づく表記'
   },
   en: {
     tagline: 'Open the door to somewhere in Japan.',
@@ -124,7 +128,11 @@ const I18N = {
     surveySend: 'Send',
     surveyLater: 'Later',
     surveyNeedEmail: 'Please enter your Google account email to help with testing.',
-    surveyThanks: 'Thank you. We will use this to improve the app.'
+    surveyThanks: 'Thank you. We will use this to improve the app.',
+    surveyConsent: 'By sending, you agree to our',
+    legalPrivacy: 'Privacy Policy',
+    legalTerms: 'Terms of Use',
+    legalTokusho: 'Legal notice (Japan)'
   }
 };
 
@@ -284,6 +292,7 @@ function applyLang() {
   get('chatInput').placeholder = humanMode ? t().humanPlaceholder : t().placeholder;
   get('langBtn').textContent = lang === 'ja' ? 'EN' : '日本語';
   document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t()[el.dataset.i18nPh]; });
+  document.querySelectorAll('a[data-legal]').forEach(el => { el.href = el.dataset.legal + '?lang=' + lang; });
   get('humanBtn').textContent = humanMode ? t().cancelHuman : t().askHuman;
   get('chatPanel').classList.toggle('human-mode', humanMode);
   renderQuota();
@@ -370,6 +379,13 @@ function paywallMessage() {
   }
   const row = message(() => (canBuy ? t().paywallBuy : t().paywall), 'sys', document.createElement('br'));
   row.querySelector('.msg-bubble').append(btn);
+  if (canBuy) {
+    const lk = document.createElement('a');
+    lk.dataset.legal = 'tokusho.html'; lk.dataset.i18n = 'legalTokusho'; lk.href = 'tokusho.html?lang=' + lang;
+    lk.target = '_blank'; lk.rel = 'noopener'; lk.textContent = t().legalTokusho;
+    lk.style.cssText = 'display:block;margin-top:8px;font-size:11px;color:#9fb4ff;';
+    row.querySelector('.msg-bubble').append(lk);
+  }
 }
 
 /* ---------- survey ---------- */

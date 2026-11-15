@@ -75,6 +75,10 @@ html, body {
   transition: all 0.3s; text-transform: uppercase;
 }
 .open-btn:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+.legal-links { position: absolute; left: 0; right: 0; bottom: max(14px, env(safe-area-inset-bottom)); display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; padding: 0 12px; font-size: 11px; }
+.legal-links a, .survey-legal a { color: #7a86b0; text-decoration: none; }
+.legal-links a:hover, .survey-legal a:hover { text-decoration: underline; }
+.survey-legal { margin: 10px 0 0; font-size: 11px; color: #888; line-height: 1.7; }
 
 .host-link {
   position: absolute; bottom: 36px;
@@ -955,6 +959,11 @@ button.hud-btn { font-family:inherit; }
     </div>
   </div>
   <button class="open-btn" data-i18n="open" onclick="openDoorAndLaunch()">扉を開く</button>
+  <div class="legal-links">
+    <a data-legal="privacy.html" href="privacy.html" target="_blank" rel="noopener" data-i18n="legalPrivacy">プライバシーポリシー</a>
+    <a data-legal="terms.html" href="terms.html" target="_blank" rel="noopener" data-i18n="legalTerms">利用規約</a>
+    <a data-legal="tokusho.html" href="tokusho.html" target="_blank" rel="noopener" data-i18n="legalTokusho">特定商取引法に基づく表記</a>
+  </div>
 </div>
 <div class="screen gone" id="s-app" style="position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;">
 
@@ -1043,6 +1052,7 @@ button.hud-btn { font-family:inherit; }
     <label data-i18n="surveyEmail">メール（任意。Androidテスターは、Googleアカウントのメール）</label>
     <input id="svEmail" type="email" maxlength="200" autocomplete="email"/>
     <label class="survey-check"><input id="svAndroid" type="checkbox"/> <span data-i18n="surveyAndroid">Android版のテストに協力する（Googleアカウントのメールが必要）</span></label>
+    <p class="survey-legal"><span data-i18n="surveyConsent">送信すると、次の内容に同意したものとみなします：</span> <a data-legal="privacy.html" href="privacy.html" target="_blank" rel="noopener" data-i18n="legalPrivacy">プライバシーポリシー</a></p>
     <div class="survey-error" id="svError"></div>
     <div class="survey-actions">
       <button class="survey-later" onclick="closeSurvey()" data-i18n="surveyLater">あとで</button>
