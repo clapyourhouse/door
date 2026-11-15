@@ -1,0 +1,10 @@
+# Door Travel - Supabase local config (minimal)
+project_id = "door-travel"
+
+[auth]
+enable_signup = true
+enable_anonymous_sign_ins = true
+
+# Stripe calls this without a Supabase JWT; the function checks Stripe's signature itself.
+[functions.stripe-webhook]
+verify_jwt = false
