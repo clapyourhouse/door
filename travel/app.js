@@ -51,7 +51,7 @@ const I18N = {
     demoAi: q => 'これはデモの回答です。「' + q.slice(0, 40) + '」への実際の回答は、サーバー接続後に表示されます。',
     demoHumanReply: 'これはデモの返信です。',
     surveyTitle: '3つだけ教えてください',
-    surveyLead: 'Doorizonをよくするためのアンケートです。',
+    surveyLead: 'Door Travelをよくするためのアンケートです。',
     surveyQ1: '日本への旅行は？',
     trip_planning: 'これから行く予定',
     trip_now: '今、日本にいる',
@@ -112,7 +112,7 @@ const I18N = {
     demoAi: q => 'This is a demo answer. A real answer to "' + q.slice(0, 40) + '" appears once the server is connected.',
     demoHumanReply: 'This is a demo reply.',
     surveyTitle: 'Three quick questions',
-    surveyLead: 'Help us make Doorizon better.',
+    surveyLead: 'Help us make Door Travel better.',
     surveyQ1: 'Your trip to Japan?',
     trip_planning: 'Planning to go',
     trip_now: "I'm in Japan now",
@@ -444,6 +444,7 @@ function nextDoor() {
 }
 
 /* 着地の演出。delayMs：光や扉が消え始めるまでの待ち時間（初回のみ長い） */
+let arriveTimer = null;
 function arrive(delayMs, first) {
   const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !current) return;
@@ -460,7 +461,9 @@ function arrive(delayMs, first) {
   frame.classList.add('focus-pull');
   arr.classList.add('show');
   hud.forEach(el => el.classList.add('arrive-in'));
-  setTimeout(() => { [frame, arr, ...hud].forEach(el => el.classList.remove('focus-pull', 'show', 'arrive-in')); }, delayMs + 4500);
+  // 連打したとき、前回のタイマーが今回の演出を消さないようにする
+  clearTimeout(arriveTimer);
+  arriveTimer = setTimeout(() => { [frame, arr, ...hud].forEach(el => el.classList.remove('focus-pull', 'show', 'arrive-in')); }, delayMs + 4500);
 }
 function goNext() { nextDoor(); arrive(0, false); }
 
