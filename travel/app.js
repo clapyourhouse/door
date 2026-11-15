@@ -443,6 +443,27 @@ function nextDoor() {
   if (justPaid) { message(() => t().buyThanks, 'sys'); justPaid = false; }
 }
 
+/* 着地の演出。delayMs：光や扉が消え始めるまでの待ち時間（初回のみ長い） */
+function arrive(delayMs, first) {
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !current) return;
+  const frame = get('sv-iframe');
+  const arr = get('arrival');
+  const hud = [get('chatPanel'), document.querySelector('.sv-overlay')].filter(Boolean);
+  get('arrivalName').textContent = cityName(current);
+  get('arrivalSub').textContent = lang === 'ja' ? '日本' : 'JAPAN';
+  frame.style.setProperty('--fp', ((delayMs + (first ? 1100 : 1300)) / 1000) + 's');
+  hud.forEach(el => el.style.setProperty('--hd', (delayMs + 900) + 'ms'));
+  arr.style.animationDelay = delayMs + 'ms';
+  [frame, arr, ...hud].forEach(el => el.classList.remove('focus-pull', 'show', 'arrive-in'));
+  void frame.offsetWidth; // 演出を、最初からやり直す
+  frame.classList.add('focus-pull');
+  arr.classList.add('show');
+  hud.forEach(el => el.classList.add('arrive-in'));
+  setTimeout(() => { [frame, arr, ...hud].forEach(el => el.classList.remove('focus-pull', 'show', 'arrive-in')); }, delayMs + 4500);
+}
+function goNext() { nextDoor(); arrive(0, false); }
+
 function openDoorAndLaunch() {
   if (opening) return;
   opening = true;
@@ -456,14 +477,28 @@ function openDoorAndLaunch() {
   app.style.display = 'flex';
   nextDoor();
   startPolling();
+  const mode = (!reduce && new URLSearchParams(location.search).get('anim') === 'light') ? 'light' : 'portal';
+  landing.dataset.anim = mode;
+  arrive(mode === 'light' ? 2300 : 1500, true);
+  const dr = get('doorWrap').getBoundingClientRect();
+  landing.style.setProperty('--cx', (dr.left + dr.width / 2) + 'px');
+  landing.style.setProperty('--cy', (dr.top + dr.height / 2) + 'px');
   landing.classList.add('entering');
   get('doorPanel').classList.add('open');
   if (reduce) {
-    setTimeout(() => { landing.classList.add('fadeout'); setTimeout(() => landing.classList.add('gone'), 750); }, 900);
+    setTimeout(() => { landing.classList.add('fadeout'); setTimeout(() => landing.classList.add('gone'), 1600); }, 900);
+    return;
+  }
+  if (mode === 'light') {
+    requestAnimationFrame(() => requestAnimationFrame(() => landing.classList.add('spread')));
+    setTimeout(() => landing.classList.add('fadeout'), 2500);
+    setTimeout(() => landing.classList.add('gone'), 4100);
     return;
   }
   get('doorWrap').classList.add('zoom');
-  setTimeout(() => landing.classList.add('gone'), 2100);
+  // 広がりきる前から、ゆっくり消し始める（映像が、じわっと現れる）
+  setTimeout(() => landing.classList.add('fadeout'), 1600);
+  setTimeout(() => landing.classList.add('gone'), 3250);
 }
 
 function toggleChat() {
@@ -598,7 +633,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadStaff();
   if (!DEMO) ensureSession().then(() => { track('land_view'); if (justPaid) track('pass_return'); pollReplies(); }).catch(() => {});
 });
-Object.assign(window, { openDoorAndLaunch, nextDoor, toggleChat, sendMessage, toggleHuman, toggleLang, pollReplies, submitSurvey, closeSurvey, toggleSvEmail, onChatKey, buildCheckoutUrl, loadStaff, CFG });
+Object.assign(window, { openDoorAndLaunch, nextDoor, goNext, arrive, toggleChat, sendMessage, toggleHuman, toggleLang, pollReplies, submitSurvey, closeSurvey, toggleSvEmail, onChatKey, buildCheckoutUrl, loadStaff, CFG });
 
 // Phones: keep the chat drawer above the on-screen keyboard and stop the page from drifting.
 (function () {
