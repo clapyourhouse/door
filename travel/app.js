@@ -625,10 +625,10 @@ function placeLinks(names) {
   wrap.className = 'place-links';
   names.forEach(n => {
     const a = document.createElement('a');
-    a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(n + ' ' + cityName(current));
+    a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&destination=' + encodeURIComponent(n + ' ' + cityName(current));
     a.target = '_blank';
     a.rel = 'noopener';
-    a.textContent = '📍 ' + n + ' →';
+    a.textContent = '📍 ' + n + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
     a.addEventListener('click', () => track('place_link'));
     wrap.append(a);
   });
