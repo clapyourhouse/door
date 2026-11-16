@@ -612,24 +612,31 @@ function noteAiAnswer() {
 
 // AIが付けた [PLACE: 店名] を、Googleマップ検索のリンクに変える（座標は使わない＝誤った場所へ飛ばない）
 function splitPlaces(reply) {
-  const names = [];
-  const text = String(reply).replace(/\[\s*PLACE\s*:\s*([^\]\n]{1,80}?)\s*\]/gi, (_, n) => {
-    if (names.length < 3 && names.indexOf(n) === -1) names.push(n);
+  const items = [];
+  const text = String(reply).replace(/\[\s*(PLACE|SEARCH)\s*:\s*([^\]\n]{1,80}?)\s*\]/gi, (_, kind, n) => {
+    const k = kind.toUpperCase() === 'SEARCH' ? 'search' : 'place';
+    if (items.length < 3 && !items.some(x => x.name === n)) items.push({ kind: k, name: n });
     return '';
   }).replace(/\n{3,}/g, '\n\n').trim();
-  return { text, names };
+  return { text, items };
 }
-function placeLinks(names) {
-  if (!names.length || !current) return null;
+// 店名が確かなもの＝扉の場所からの経路／確かでないもの＝Googleマップの検索（座標は使わない）
+function placeLinks(items) {
+  if (!items.length || !current) return null;
   const wrap = document.createElement('div');
   wrap.className = 'place-links';
-  names.forEach(n => {
+  items.forEach(it => {
     const a = document.createElement('a');
-    a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&destination=' + encodeURIComponent(n + ' ' + cityName(current));
+    if (it.kind === 'search') {
+      a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(it.name);
+      a.textContent = '🔍 ' + it.name + (lang === 'en' ? ' · search on Google Maps →' : '（Googleマップで探す）→');
+    } else {
+      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&destination=' + encodeURIComponent(it.name + ' ' + cityName(current));
+      a.textContent = '📍 ' + it.name + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
+    }
     a.target = '_blank';
     a.rel = 'noopener';
-    a.textContent = '📍 ' + n + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
-    a.addEventListener('click', () => track('place_link'));
+    a.addEventListener('click', () => track(it.kind === 'search' ? 'search_link' : 'place_link'));
     wrap.append(a);
   });
   return wrap;
@@ -664,7 +671,7 @@ async function askAi(question) {
     else if (r.data.mode === 'free_daily') quota = { kind: 'daily', left: r.data.daily_remaining };
     else quota = { kind: 'free', left: r.data.free_remaining };
     renderQuota();
-    message(parts.text, undefined, placeLinks(parts.names));
+    message(parts.text, undefined, placeLinks(parts.items));
     noteAiAnswer();
     return;
   }
