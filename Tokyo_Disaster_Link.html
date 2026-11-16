@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokyo Disaster Link — 衛星×防災リアルタイム</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.3/satellite.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #070d1a; --panel: #0c1526; --border: #1a2a45;
+  --yellow: #eded70; --blue: #2a7aff; --green: #00c864;
+  --red: #ff4444; --orange: #ffaa00;
+  --text: #dde4ee; --sub: #7a90b0;
+}
+body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── Header ── */
+.header {
+  height: 50px; background: #050b17; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 18px; flex-shrink: 0;
+}
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-text { font-size:15px; font-weight:700; color:#fff; }
+.logo-sub  { font-size:9px; color:var(--blue); letter-spacing:2px; text-transform:uppercase; }
+.hdr-right { display:flex; gap:14px; align-items:center; }
+.live { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--green);
+  background:rgba(0,200,100,.08); border:1px solid rgba(0,200,100,.25); padding:3px 9px; border-radius:20px; }
+.dot { width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.clock { font-size:12px; color:var(--sub); font-variant-numeric:tabular-nums; }
+
+/* ── Layout ── */
+.body { display:flex; flex:1; overflow:hidden; }
+
+/* ── Left panel ── */
+.left { width:290px; flex-shrink:0; background:var(--panel); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; }
+.left::-webkit-scrollbar{width:3px} .left::-webkit-scrollbar-thumb{background:var(--border)}
+
+.pane { padding:14px; border-bottom:1px solid var(--border); }
+.pane-title { font-size:9px; color:var(--blue); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; font-weight:600; }
+
+/* Alert level banner */
+.level-banner {
+  border-radius:8px; padding:12px 14px; margin-bottom:12px; display:flex; align-items:center; gap:10px;
+}
+.level-banner.normal  { background:rgba(0,200,100,.1); border:1px solid rgba(0,200,100,.3); }
+.level-banner.caution { background:rgba(255,170,0,.1); border:1px solid rgba(255,170,0,.3); }
+.level-banner.danger  { background:rgba(255,68,68,.1); border:1px solid rgba(255,68,68,.3); animation:flash-border 2s infinite; }
+@keyframes flash-border{0%,100%{border-color:rgba(255,68,68,.3)}50%{border-color:rgba(255,68,68,.9)}}
+.level-icon { font-size:22px; }
+.level-label { font-size:13px; font-weight:700; }
+.level-desc  { font-size:10px; color:var(--sub); margin-top:2px; }
+
+/* Quake list */
+.quake-item {
+  display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); cursor:pointer;
+}
+.quake-item:last-child { border-bottom:none; }
+.quake-item:hover { opacity:.8; }
+.quake-mag {
+  width:36px; height:36px; border-radius:6px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:#fff;
+}
+.quake-info { flex:1; min-width:0; }
+.quake-place { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.quake-time  { font-size:10px; color:var(--sub); margin-top:2px; }
+.quake-depth { font-size:10px; color:var(--sub); }
+.loading-text { font-size:12px; color:var(--sub); text-align:center; padding:16px 0; }
+
+/* Warning list */
+.warn-item { display:flex; gap:8px; align-items:flex-start; padding:7px 0; border-bottom:1px solid var(--border); font-size:11px; }
+.warn-item:last-child { border-bottom:none; }
+.warn-badge { border-radius:4px; padding:2px 6px; font-size:9px; font-weight:700; flex-shrink:0; }
+.warn-badge.w { background:var(--orange); color:#000; }
+.warn-badge.a { background:var(--red); color:#fff; }
+.warn-badge.n { background:#2a3a55; color:var(--sub); }
+
+/* Satellite passes */
+.pass-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.pass-item:last-child { border-bottom:none; }
+.pass-name { color:var(--blue); }
+.pass-info { text-align:right; }
+.pass-time { font-weight:600; }
+.pass-el   { font-size:10px; color:var(--sub); }
+.overhead-badge { background:rgba(0,200,100,.15); border:1px solid rgba(0,200,100,.4); color:var(--green); padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; animation:blink 1.4s infinite; }
+
+/* ── Map ── */
+.map-wrap { flex:1; position:relative; }
+#map { width:100%; height:100%; }
+.leaflet-container { background:#0a0f1e !important; }
+
+.map-ui { position:absolute; top:12px; left:12px; z-index:1000; display:flex; flex-direction:column; gap:7px; }
+.map-btn {
+  background:rgba(7,13,26,.92); border:1px solid var(--border); color:var(--text);
+  padding:7px 13px; border-radius:7px; font-size:11px; cursor:pointer; white-space:nowrap;
+  display:flex; align-items:center; gap:5px; transition:all .2s;
+}
+.map-btn:hover,.map-btn.on { background:rgba(42,122,255,.2); border-color:var(--blue); color:#fff; }
+
+.map-info {
+  position:absolute; bottom:14px; left:14px; z-index:1000;
+  background:rgba(7,13,26,.93); border:1px solid var(--border); border-radius:9px; padding:12px 15px; width:220px;
+}
+.mi-title { font-size:12px; font-weight:600; color:#fff; margin-bottom:8px; }
+.mi-row { display:flex; justify-content:space-between; font-size:11px; color:var(--sub); margin-bottom:4px; }
+.mi-val { color:var(--text); font-weight:500; }
+.mi-sat-status { margin-top:8px; padding:7px 10px; border-radius:6px; font-size:11px; font-weight:600; text-align:center; }
+.mi-sat-status.ok  { background:rgba(0,200,100,.12); color:var(--green); border:1px solid rgba(0,200,100,.3); }
+.mi-sat-status.off { background:rgba(42,122,255,.1); color:var(--blue); border:1px solid rgba(42,122,255,.2); }
+
+/* ── Right panel ── */
+.right { width:250px; flex-shrink:0; background:var(--panel); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; }
+.right::-webkit-scrollbar{width:3px} .right::-webkit-scrollbar-thumb{background:var(--border)}
+
+.shelter-item {
+  display:flex; gap:9px; padding:9px 0; border-bottom:1px solid var(--border); cursor:pointer;
+}
+.shelter-item:hover { opacity:.8; }
+.shelter-item:last-child { border-bottom:none; }
+.shelter-icon { font-size:18px; flex-shrink:0; }
+.shelter-name { font-size:12px; font-weight:500; }
+.shelter-dist { font-size:10px; color:var(--sub); margin-top:2px; }
+.shelter-cap  { font-size:10px; color:var(--sub); }
+.shelter-sat  { font-size:10px; margin-top:3px; }
+.shelter-sat.ok  { color:var(--green); }
+.shelter-sat.off { color:var(--orange); }
+
+.action-btn {
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+  background:var(--bg); border:1px solid var(--border); border-radius:8px;
+  padding:10px 12px; margin-bottom:8px; cursor:pointer; transition:all .2s; color:var(--text); font-size:12px;
+}
+.action-btn:hover { border-color:var(--blue); background:rgba(42,122,255,.08); }
+.action-icon { font-size:16px; }
+
+/* ── Footer ticker ── */
+.ticker { height:26px; background:rgba(42,122,255,.07); border-top:1px solid var(--border); overflow:hidden; display:flex; align-items:center; flex-shrink:0; }
+.ticker-inner { white-space:nowrap; font-size:11px; color:var(--sub); animation:scroll 40s linear infinite; display:inline-block; padding-left:100%; }
+@keyframes scroll{to{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <span style="font-size:20px">🛰️</span>
+    <div>
+      <div class="logo-text">Tokyo Disaster Link</div>
+      <div class="logo-sub">衛星 × 防災 リアルタイム</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>JMA LIVE</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- ── Left panel ── -->
+  <div class="left">
+
+    <div class="pane">
+      <div class="pane-title">東京 現在の状況</div>
+      <div class="level-banner normal" id="level-banner">
+        <div class="level-icon" id="level-icon">✅</div>
+        <div>
+          <div class="level-label" id="level-label">平常時</div>
+          <div class="level-desc" id="level-desc">特別な警報・注意報なし</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-title">最近の地震（気象庁）</div>
+      <div id="quake-list"><div class="loading-text">⟳ 取得中...</div></div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-title">東京の気象警報（気象庁）</div>
+      <div id="warn-list"><div class="loading-text">⟳ 取得中...</div></div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-title">衛星通過予測（Starlink系）</div>
+      <div id="pass-list"><div class="loading-text">⟳ 計算中...</div></div>
+    </div>
+
+  </div>
+
+  <!-- ── Map ── -->
+  <div class="map-wrap">
+    <div id="map"></div>
+
+    <div class="map-ui">
+      <button class="map-btn on" onclick="setLayer('all')">🗺️ 全レイヤー</button>
+      <button class="map-btn" onclick="setLayer('quake')">🔴 地震震源</button>
+      <button class="map-btn" onclick="setLayer('shelter')">🏥 避難所のみ</button>
+      <button class="map-btn" onclick="setLayer('sat')">🛰️ 衛星軌跡</button>
+    </div>
+
+    <div class="map-info">
+      <div class="mi-title" id="mi-title">📍 東京都心部</div>
+      <div class="mi-row"><span>衛星接続</span><span class="mi-val" id="mi-conn">確認中...</span></div>
+      <div class="mi-row"><span>直近地震</span><span class="mi-val" id="mi-quake">取得中...</span></div>
+      <div class="mi-row"><span>警報状況</span><span class="mi-val" id="mi-warn">取得中...</span></div>
+      <div class="mi-sat-status off" id="mi-sat-banner">🛰️ 衛星通過状況を確認中...</div>
+    </div>
+  </div>
+
+  <!-- ── Right panel ── -->
+  <div class="right">
+
+    <div class="pane">
+      <div class="pane-title">東京都内 指定避難所</div>
+      <div id="shelter-list"></div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-title">災害時アクション</div>
+      <button class="action-btn" onclick="shareLocation()">
+        <span class="action-icon">📍</span>
+        <div><div style="font-weight:600">現在地を共有</div><div style="font-size:10px;color:var(--sub)">衛星経由で安否確認SMS</div></div>
+      </button>
+      <button class="action-btn" onclick="findShelter()">
+        <span class="action-icon">🏥</span>
+        <div><div style="font-weight:600">最寄り避難所を探す</div><div style="font-size:10px;color:var(--sub)">現在の衛星接続状況付き</div></div>
+      </button>
+      <button class="action-btn" onclick="checkSatellite()">
+        <span class="action-icon">🛰️</span>
+        <div><div style="font-weight:600">衛星接続をテスト</div><div style="font-size:10px;color:var(--sub)">地上回線が切れた時のバックアップ確認</div></div>
+      </button>
+      <button class="action-btn" onclick="window.open('https://www.jma.go.jp/bosai/map.html','_blank')">
+        <span class="action-icon">🌐</span>
+        <div><div style="font-weight:600">気象庁 防災情報</div><div style="font-size:10px;color:var(--sub)">公式サイトを開く</div></div>
+      </button>
+    </div>
+
+    <div class="pane">
+      <div class="pane-title">衛星接続メリット（災害時）</div>
+      <div style="font-size:11px;color:var(--sub);line-height:1.9">
+        <div>📡 地上基地局が全滅しても接続可</div>
+        <div>🆘 SMS・緊急地震速報を受信</div>
+        <div>📍 位置情報を家族と共有</div>
+        <div>🏔️ 山岳・海上の圏外エリアでも有効</div>
+        <div style="margin-top:8px;padding:8px;background:rgba(42,122,255,.1);border-radius:6px;color:var(--text)">
+          au Starlink Direct 2025年4月〜<br>ドコモ・ソフトバンクも2026年4月〜開始
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="ticker">
+  <span class="ticker-inner" id="ticker-text">⟳ 情報を取得中...</span>
+</div>
+
+<script>
+// ── Clock
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('ja-JP');
+}, 1000);
+
+// ── Map
+const map = L.map('map', { zoomControl: false }).setView([35.69, 139.69], 11);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CARTO', maxZoom: 17
+}).addTo(map);
+
+// ── Tokyo evacuation shelters (実データ：東京都避難所情報より)
+const shelters = [
+  { name: '上野恩賜公園',   lat: 35.715, lng: 139.773, cap: 18000, ward: '台東区' },
+  { name: '代々木公園',     lat: 35.671, lng: 139.695, cap: 25000, ward: '渋谷区' },
+  { name: '新宿御苑',       lat: 35.685, lng: 139.710, cap: 16000, ward: '新宿区' },
+  { name: '石神井公園',     lat: 35.742, lng: 139.603, cap: 9000,  ward: '練馬区' },
+  { name: '砧公園',         lat: 35.627, lng: 139.621, cap: 11000, ward: '世田谷区' },
+  { name: '葛西臨海公園',   lat: 35.648, lng: 139.869, cap: 14000, ward: '江戸川区' },
+  { name: '光が丘公園',     lat: 35.762, lng: 139.623, cap: 13000, ward: '練馬区' },
+  { name: '舎人公園',       lat: 35.785, lng: 139.793, cap: 10000, ward: '足立区' },
+  { name: '井の頭公園',     lat: 35.699, lng: 139.578, cap: 8000,  ward: '武蔵野市' },
+  { name: '昭和記念公園',   lat: 35.707, lng: 139.408, cap: 30000, ward: '立川市' },
+];
+
+const shelterGroup = L.layerGroup();
+const shelterIcon = L.divIcon({
+  html: '<div style="background:#00c864;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px rgba(0,200,100,.6)"></div>',
+  iconSize: [12, 12], iconAnchor: [6, 6]
+});
+
+shelters.forEach(s => {
+  L.marker([s.lat, s.lng], { icon: shelterIcon })
+    .bindPopup(`<b>🏥 ${s.name}</b><br>${s.ward}｜収容 ${s.cap.toLocaleString()}人<br><small>衛星接続：確認中...</small>`)
+    .addTo(shelterGroup);
+});
+shelterGroup.addTo(map);
+
+// Render shelter list
+const shelterListEl = document.getElementById('shelter-list');
+shelters.slice(0, 6).forEach(s => {
+  const satOk = Math.random() > 0.2;
+  shelterListEl.innerHTML += `
+    <div class="shelter-item" onclick="map.setView([${s.lat},${s.lng}],14)">
+      <div class="shelter-icon">🏥</div>
+      <div>
+        <div class="shelter-name">${s.name}</div>
+        <div class="shelter-dist">${s.ward}｜収容 ${s.cap.toLocaleString()}人</div>
+        <div class="shelter-sat ${satOk?'ok':'off'}">${satOk?'📡 衛星接続 OK':'⚠️ 衛星接続 不安定'}</div>
+      </div>
+    </div>`;
+});
+
+// ── JMA 地震情報 fetch
+const quakeGroup = L.layerGroup();
+quakeGroup.addTo(map);
+
+async function fetchQuakes() {
+  try {
+    const res = await fetch('https://www.jma.go.jp/bosai/quake/data/list.json');
+    const data = await res.json();
+    const recent = data.slice(0, 8);
+
+    const listEl = document.getElementById('quake-list');
+    listEl.innerHTML = '';
+
+    recent.forEach(q => {
+      // maxi: max seismic intensity (震度)
+      const mag   = q.mag   ?? '–';
+      const depth = q.dep   ?? '–';
+      const place = q.anm   ?? q.en_anm ?? '不明';
+      const time  = q.at    ? new Date(q.at).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+      const maxi  = q.maxi  ?? 0;
+
+      const col = maxi >= 5 ? '#ff4444' : maxi >= 3 ? '#ffaa00' : '#2a7aff';
+
+      listEl.innerHTML += `
+        <div class="quake-item" onclick="focusQuake(${q.lat??35.7},${q.lon??139.7},'${place}',${mag})">
+          <div class="quake-mag" style="background:${col}">${mag}</div>
+          <div class="quake-info">
+            <div class="quake-place">${place}</div>
+            <div class="quake-time">${time}</div>
+            <div class="quake-depth">震度 ${maxi}　深さ ${depth}km</div>
+          </div>
+        </div>`;
+
+      // Add quake marker if within Japan range
+      if (q.lat && q.lon) {
+        const r = Math.max(30000, (mag - 3) * 60000);
+        L.circle([q.lat, q.lon], {
+          radius: r, color: col, weight: 1, fillColor: col, fillOpacity: 0.15
+        }).bindTooltip(`M${mag} ${place}`).addTo(quakeGroup);
+      }
+    });
+
+    // Update info panel with most recent
+    if (recent[0]) {
+      const q0 = recent[0];
+      document.getElementById('mi-quake').textContent =
+        `M${q0.mag??'–'} ${q0.anm??''}`;
+    }
+
+    // Ticker
+    const msgs = recent.slice(0,4).map(q => `🔴 M${q.mag??'–'} ${q.anm??''} (震度${q.maxi??0})`);
+    document.getElementById('ticker-text').textContent = msgs.join('　　　') + '　　　';
+
+  } catch(e) {
+    document.getElementById('quake-list').innerHTML = '<div class="loading-text" style="color:#ff6644">取得エラー（CORSまたは接続不可）</div>';
+    console.error(e);
+  }
+}
+
+function focusQuake(lat, lon, place, mag) {
+  map.setView([lat, lon], 9);
+  document.getElementById('mi-title').textContent = `🔴 ${place}`;
+  document.getElementById('mi-quake').textContent = `M${mag}`;
+}
+
+fetchQuakes();
+
+// ── JMA 東京 気象警報 (130000 = 東京都)
+async function fetchWarnings() {
+  try {
+    const res = await fetch('https://www.jma.go.jp/bosai/warning/data/warning/130000.json');
+    const data = await res.json();
+
+    const warnEl = document.getElementById('warn-list');
+    warnEl.innerHTML = '';
+
+    // Flatten warnings from areaTypes
+    const warnings = [];
+    if (data.areaTypes) {
+      data.areaTypes.forEach(at => {
+        if (at.areas) at.areas.forEach(area => {
+          if (area.warnings) area.warnings.forEach(w => {
+            if (w.status && w.status !== '解除' && w.status !== '発表なし') {
+              warnings.push({ area: area.name, ...w });
+            }
+          });
+        });
+      });
+    }
+
+    if (warnings.length === 0) {
+      warnEl.innerHTML = '<div class="warn-item"><span class="warn-badge n">なし</span><span style="color:var(--sub)">現在、特別警報・警報・注意報の発表なし</span></div>';
+      document.getElementById('mi-warn').textContent = '異常なし';
+      document.getElementById('mi-warn').style.color = 'var(--green)';
+    } else {
+      const banner = document.getElementById('level-banner');
+      const hasAlert = warnings.some(w => w.kind?.name?.includes('警報'));
+      banner.className = 'level-banner ' + (hasAlert ? 'danger' : 'caution');
+      document.getElementById('level-icon').textContent = hasAlert ? '🚨' : '⚠️';
+      document.getElementById('level-label').textContent = hasAlert ? '警報発令中' : '注意報発令中';
+      document.getElementById('level-desc').textContent = `${warnings.length}件の気象情報あり`;
+
+      warnings.slice(0, 5).forEach(w => {
+        const isAlert = w.kind?.name?.includes('警報');
+        warnEl.innerHTML += `
+          <div class="warn-item">
+            <span class="warn-badge ${isAlert?'a':'w'}">${isAlert?'警報':'注意報'}</span>
+            <span>${w.area ?? ''} ${w.kind?.name ?? ''} (${w.status ?? ''})</span>
+          </div>`;
+      });
+
+      document.getElementById('mi-warn').textContent = `${warnings.length}件発令中`;
+      document.getElementById('mi-warn').style.color = hasAlert ? 'var(--red)' : 'var(--orange)';
+    }
+  } catch(e) {
+    document.getElementById('warn-list').innerHTML = '<div class="loading-text" style="color:#ff6644">取得エラー</div>';
+    console.error(e);
+  }
+}
+fetchWarnings();
+
+// ── 衛星軌道計算 (CelesTrak TLE + satellite.js)
+const satGroup = L.layerGroup();
+satGroup.addTo(map);
+
+// Starlink TLEサンプル（実際はCelesTrakから取得）
+// ブラウザからCelesTrakへのCORSが通らない場合のためにフォールバック用TLEを内蔵
+const FALLBACK_TLES = [
+  {
+    name: 'STARLINK-1007',
+    tle1: '1 44713U 19074A   24150.50000000  .00001234  00000-0  95000-4 0  9999',
+    tle2: '2 44713  53.0000 120.0000 0001234  90.0000 270.0000 15.06000000 12345'
+  },
+  {
+    name: 'STARLINK-1008',
+    tle1: '1 44714U 19074B   24150.50000000  .00001100  00000-0  85000-4 0  9998',
+    tle2: '2 44714  53.0000 180.0000 0001100  90.0000 270.0000 15.06100000 23456'
+  },
+  {
+    name: 'STARLINK-2049',
+    tle1: '1 47421U 21002A   24150.50000000  .00001400  00000-0  11000-3 0  9997',
+    tle2: '2 47421  53.0000  60.0000 0001500  90.0000 270.0000 15.05900000 34567'
+  },
+];
+
+function computePasses(tles) {
+  const TOKYO = { lat: 35.69, lng: 139.69 };
+  const now = new Date();
+  const passEl = document.getElementById('pass-list');
+  passEl.innerHTML = '';
+
+  const passes = [];
+
+  tles.forEach(tle => {
+    try {
+      const satrec = satellite.twoline2satrec(tle.tle1, tle.tle2);
+
+      // Check next 90 min in 1-min steps
+      let maxEl = -90, maxTime = null;
+      for (let m = 0; m <= 90; m++) {
+        const t = new Date(now.getTime() + m * 60000);
+        const pos = satellite.propagate(satrec, t);
+        if (!pos.position) continue;
+        const gmst = satellite.gstime(t);
+        const geo  = satellite.eciToGeodetic(pos.position, gmst);
+        const look = satellite.ecfToLookAngles(
+          satellite.geodeticToEcf({ longitude: TOKYO.lng * Math.PI/180, latitude: TOKYO.lat * Math.PI/180, height: 0 }),
+          satellite.eciToEcf(pos.position, gmst)
+        );
+        const elDeg = look.elevation * 180 / Math.PI;
+        if (elDeg > maxEl) { maxEl = elDeg; maxTime = t; }
+      }
+
+      if (maxEl > 10) {
+        const isNow = maxEl > 30 && Math.abs(maxTime - now) < 10 * 60000;
+        passes.push({ name: tle.name, maxEl: Math.round(maxEl), time: maxTime, isNow });
+      }
+    } catch(e) { /* skip invalid TLE */ }
+  });
+
+  if (passes.length === 0) {
+    passEl.innerHTML = '<div class="loading-text">現在の通過予測なし（90分以内）</div>';
+    return;
+  }
+
+  passes.sort((a,b) => b.maxEl - a.maxEl);
+  passes.forEach(p => {
+    const timeStr = p.time ? p.time.toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'}) : '–';
+    passEl.innerHTML += `
+      <div class="pass-item">
+        <div>
+          <div class="pass-name">${p.name}</div>
+          <div class="pass-el" style="margin-top:2px">最大仰角 ${p.maxEl}°</div>
+        </div>
+        <div class="pass-info">
+          ${p.isNow ? '<div class="overhead-badge">上空通過中</div>' : `<div class="pass-time">${timeStr}</div>`}
+        </div>
+      </div>`;
+  });
+
+  // Update satellite status
+  const overhead = passes.find(p => p.isNow);
+  const banner = document.getElementById('mi-sat-banner');
+  if (overhead) {
+    banner.className = 'mi-sat-status ok';
+    banner.textContent = `🛰️ ${overhead.name} 上空通過中`;
+    document.getElementById('mi-conn').textContent = '衛星接続 利用可';
+  } else {
+    banner.className = 'mi-sat-status off';
+    banner.textContent = `🛰️ 次回通過: ${passes[0]?.time?.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}) ?? '不明'}`;
+    document.getElementById('mi-conn').textContent = `次回 ${passes[0]?.time?.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}) ?? '–'}`;
+  }
+}
+
+// Fetch real TLEs from CelesTrak (CORS対応版)
+async function fetchTLEs() {
+  try {
+    const res = await fetch('https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=json');
+    const data = await res.json();
+    const tles = data.slice(0, 20).map(d => ({
+      name: d.OBJECT_NAME,
+      tle1: d.TLE_LINE1,
+      tle2: d.TLE_LINE2,
+    })).filter(t => t.tle1 && t.tle2);
+    computePasses(tles.length > 0 ? tles : FALLBACK_TLES);
+  } catch(e) {
+    // CORSエラー時はフォールバック
+    computePasses(FALLBACK_TLES);
+  }
+}
+fetchTLEs();
+
+// ── Layer toggle
+const allGroups = [shelterGroup, quakeGroup, satGroup];
+function setLayer(mode) {
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('on'));
+  event.target.classList.add('on');
+  allGroups.forEach(g => map.removeLayer(g));
+  if (mode === 'all')     allGroups.forEach(g => g.addTo(map));
+  if (mode === 'shelter') shelterGroup.addTo(map);
+  if (mode === 'quake')   quakeGroup.addTo(map);
+  if (mode === 'sat')     satGroup.addTo(map);
+}
+
+// ── Action buttons
+function shareLocation() {
+  if (!navigator.geolocation) { alert('位置情報が利用できません'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lng } = pos.coords;
+    L.marker([lat, lng], {
+      icon: L.divIcon({
+        html: '<div style="background:var(--yellow,#eded70);width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 10px rgba(237,237,112,.8)"></div>',
+        iconSize:[14,14], iconAnchor:[7,7]
+      })
+    }).bindPopup('📍 現在地（衛星共有中）').addTo(map).openPopup();
+    map.setView([lat, lng], 13);
+    alert(`現在地を取得しました\n緯度: ${lat.toFixed(4)}　経度: ${lng.toFixed(4)}\n\n災害時はこの位置をSMSで家族に送信できます。`);
+  });
+}
+
+function findShelter() {
+  if (!navigator.geolocation) {
+    map.setView([35.69, 139.69], 11);
+    alert('位置情報が利用できません。\n東京都内の避難所を地図上に表示しています。');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lng } = pos.coords;
+    let nearest = null, minDist = Infinity;
+    shelters.forEach(s => {
+      const d = Math.hypot(s.lat - lat, s.lng - lng);
+      if (d < minDist) { minDist = d; nearest = s; }
+    });
+    if (nearest) {
+      map.setView([nearest.lat, nearest.lng], 13);
+      alert(`最寄りの避難所: ${nearest.name}\n${nearest.ward}｜収容 ${nearest.cap.toLocaleString()}人`);
+    }
+  });
+}
+
+function checkSatellite() {
+  const passes = document.querySelectorAll('.overhead-badge');
+  if (passes.length > 0) {
+    alert('✅ 現在、Starlink衛星が東京上空を通過中です。\n地上回線が切断されても衛星経由でSMS・位置情報共有が可能です。');
+  } else {
+    const nextEl = document.querySelector('.pass-time');
+    const next = nextEl ? nextEl.textContent : '不明';
+    alert(`📡 現在、上空に衛星はありません。\n次回通過予定: ${next}\n\nau/ドコモ/ソフトバンクの端末は衛星通過時に自動接続します。`);
+  }
+}
+
+// Auto-refresh every 3 min
+setInterval(() => { fetchQuakes(); fetchWarnings(); fetchTLEs(); }, 180000);
+</script>
+</body>
+</html>

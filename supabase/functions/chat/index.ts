@@ -2,6 +2,7 @@
 import { adminClient, cleanTurns, corsHeaders, envInt, json, normLang, userFromRequest } from '../_shared/http.ts';
 
 const FREE_LIMIT = envInt('FREE_QUESTION_LIMIT', 5);
+const FREE_DAILY = envInt('FREE_DAILY_AFTER', 1);
 const DAILY_LIMIT = envInt('PASS_DAILY_LIMIT', 100);
 const MODEL = Deno.env.get('OPENAI_MODEL') ?? 'gpt-4.1-mini';
 const OPENAI_URL = `${Deno.env.get('OPENAI_BASE_URL') ?? 'https://api.openai.com/v1'}/chat/completions`;
@@ -44,10 +45,10 @@ Deno.serve(async (req) => {
   if (!city) return json({ error: 'unknown_city' }, 400);
 
   const { data: spent, error: spendErr } = await admin.rpc('consume_question', {
-    p_user: user.id, p_free_limit: FREE_LIMIT, p_daily_limit: DAILY_LIMIT,
+    p_user: user.id, p_free_limit: FREE_LIMIT, p_daily_limit: DAILY_LIMIT, p_free_daily: FREE_DAILY,
   });
   if (spendErr || !spent) return json({ error: 'server_error' }, 500);
-  if (!spent.allowed) return json({ error: spent.reason, ...spent }, spent.reason === 'free_limit' ? 402 : 429);
+  if (!spent.allowed) return json({ error: spent.reason, ...spent }, (spent.reason === 'free_limit' || spent.reason === 'free_daily_limit') ? 402 : 429);
 
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   let reply = '';

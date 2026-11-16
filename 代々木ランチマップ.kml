@@ -1,0 +1,132 @@
+<?xml version="1.0" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>代々木ランチマップ</name>
+    <Placemark>
+      <name>麺恋処 いそじ</name>
+      <description>ラーメン 代々木1-14-5</description>
+      <Point>
+        <coordinates>139.7028,35.6852,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>ラーメン ヤスオ</name>
+      <description>ラーメン 代々木2-29-3</description>
+      <Point>
+        <coordinates>139.6999,35.6859,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>MISO HANAMICHI 本店</name>
+      <description>ラーメン 味噌 千駄ヶ谷3-26-7</description>
+      <Point>
+        <coordinates>139.7078,35.6771,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>シャンウェイ 本店</name>
+      <description>四川料理 千駄ヶ谷4-29-12</description>
+      <Point>
+        <coordinates>139.7039,35.6810,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>ブラッスリー サリュー</name>
+      <description>カフェ 洋食 千駄ヶ谷4-5-11</description>
+      <Point>
+        <coordinates>139.7042,35.6801,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>風雲児 新宿本店</name>
+      <description>ラーメン 代々木2-14-3</description>
+      <Point>
+        <coordinates>139.6999,35.6841,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>ムーンボウ</name>
+      <description>カレー 代々木2-30-4</description>
+      <Point>
+        <coordinates>139.6997,35.6858,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>うどん 慎</name>
+      <description>うどん 代々木2-20-16</description>
+      <Point>
+        <coordinates>139.7006,35.6852,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>楢製麺</name>
+      <description>うどん ラーメン 代々木2-26-2</description>
+      <Point>
+        <coordinates>139.7001,35.6857,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>伊之瀬</name>
+      <description>つけ麺 代々木2-20-19</description>
+      <Point>
+        <coordinates>139.7007,35.6853,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>ライオンシェア</name>
+      <description>カレー 代々木3-1-7</description>
+      <Point>
+        <coordinates>139.6974,35.6838,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>BAKERY BURGER JBS TOKYO</name>
+      <description>ハンバーガー 代々木1-33-3</description>
+      <Point>
+        <coordinates>139.7022,35.684,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>らすた 代々木店</name>
+      <description>ラーメン 代々木1-38-10</description>
+      <Point>
+        <coordinates>139.7022,35.6835,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>eggslut 新宿サザンテラス</name>
+      <description>カフェ 代々木2-2-1</description>
+      <Point>
+        <coordinates>139.7025,35.6862,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>GINGER GRASS</name>
+      <description>タイ ベトナム 代々木2-2-1</description>
+      <Point>
+        <coordinates>139.7023,35.6861,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>アヒリヤ 代々木店</name>
+      <description>インド料理 代々木1-34-3</description>
+      <Point>
+        <coordinates>139.702,35.6839,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>でっかい餃子 代々木店</name>
+      <description>餃子 台湾料理 代々木1-33-2</description>
+      <Point>
+        <coordinates>139.7021,35.684,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>グリーンスポット</name>
+      <description>野菜料理 洋食 代々木1-21-12</description>
+      <Point>
+        <coordinates>139.7027,35.6846,0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

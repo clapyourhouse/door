@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代々木ランチマップ | ELEMENT 代々木店</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Yu Gothic", "Hiragino Sans", sans-serif; background: #0F1F2E; color: #fff; }
+  header { background: #0F1F2E; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #EDED70; }
+  header h1 { font-size: 15px; color: #EDED70; font-weight: bold; }
+  header span { font-size: 9px; color: #999; }
+  #container { display: flex; height: calc(100vh - 50px); }
+  #sidebar { width: 290px; min-width: 260px; background: #0F1F2E; overflow-y: auto; border-right: 1px solid #1e3a5a; }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: #EDED70; border-radius: 2px; }
+  .section-title { padding: 8px 14px 4px; font-size: 10px; color: #EDED70; font-weight: bold; letter-spacing: 0.1em; border-bottom: 1px solid #1e3a5a; }
+  .shop-item { padding: 9px 14px; border-bottom: 1px solid #1a2e44; cursor: pointer; transition: background 0.15s; }
+  .shop-item:hover { background: #1a3050; }
+  .shop-item.active { background: #1e3a5a; border-left: 3px solid #EDED70; }
+  .shop-name { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 3px; }
+  .shop-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .shop-genre { font-size: 10px; color: #999; }
+  .shop-links { margin-top: 5px; display: flex; gap: 6px; }
+  .shop-links a { font-size: 10px; color: #6ab0e0; text-decoration: none; border: 1px solid #2a4060; padding: 2px 7px; border-radius: 3px; }
+  .shop-links a:hover { background: #1e3a5a; color: #EDED70; border-color: #EDED70; }
+  #map { flex: 1; }
+  .leaflet-popup-content-wrapper { background: #0F1F2E; color: #fff; border: 1px solid #EDED70; border-radius: 6px; }
+  .leaflet-popup-tip { background: #0F1F2E; }
+  .popup-name { font-size: 13px; font-weight: bold; color: #EDED70; margin-bottom: 4px; }
+  .popup-genre { font-size: 11px; color: #aaa; margin-bottom: 3px; }
+  .popup-address { font-size: 10px; color: #888; margin: 3px 0; }
+  .popup-links { margin-top: 6px; display: flex; gap: 6px; }
+  .popup-links a { font-size: 11px; color: #6ab0e0; text-decoration: none; border: 1px solid #2a4060; padding: 3px 9px; border-radius: 3px; }
+  .popup-links a:hover { border-color: #EDED70; color: #EDED70; }
+</style>
+</head>
+<body>
+<header>
+  <h1>代々木ランチマップ ｜ 18選（徒歩15分圏内）</h1>
+  <span>ELEMENT 代々木店  /  オーナー資料</span>
+</header>
+<div id="container">
+  <div id="sidebar"><div id="list"></div></div>
+  <div id="map"></div>
+</div>
+<script>
+const restaurants = [
+  // 千駄ヶ谷エリア（北参道）
+  {id:1, name:"麺恋処 いそじ",       genre:"ラーメン",         address:"代々木1-14-5",        lat:35.6852, lng:139.7028, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13041621/", gmap:"https://maps.google.com/maps/search/?api=1&query=麺恋処いそじ+東京都渋谷区代々木1-14-5"},
+  {id:2, name:"ラーメン ヤスオ",      genre:"ラーメン",         address:"代々木2-29-3",        lat:35.6859, lng:139.6999, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13146213/", gmap:"https://maps.google.com/maps/search/?api=1&query=ラーメンヤスオ+東京都渋谷区代々木2-29-3"},
+  {id:3, name:"MISO HANAMICHI 本店", genre:"ラーメン（味噌）",  address:"千駄ヶ谷3-26-7",     lat:35.6771, lng:139.7078, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13276694/", gmap:"https://maps.google.com/maps/search/?api=1&query=MISO+HANAMICHI+東京都渋谷区千駄ヶ谷3-26-7"},
+  {id:4, name:"シャンウェイ 本店",    genre:"四川料理",         address:"千駄ヶ谷4-29-12",    lat:35.6810, lng:139.7039, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13263163/", gmap:"https://maps.google.com/maps/search/?api=1&query=シャンウェイ+東京都渋谷区千駄ヶ谷4-29-12"},
+  {id:5, name:"ブラッスリー・サリュー",genre:"カフェ/洋食",     address:"千駄ヶ谷4-5-11",     lat:35.6801, lng:139.7042, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13283471/", gmap:"https://maps.google.com/maps/search/?api=1&query=ブラッスリーサリュー+東京都渋谷区千駄ヶ谷4-5-11"},
+  // 代々木エリア
+  {id:6, name:"風雲児 新宿本店",      genre:"ラーメン",         address:"代々木2-14-3",        lat:35.6841, lng:139.6999, tabelog:"https://tabelog.com/tokyo/A1304/A130401/13044091/", gmap:"https://maps.google.com/maps/search/?api=1&query=風雲児+東京都渋谷区代々木2-14-3"},
+  {id:7, name:"ムーンボウ",           genre:"カレー",           address:"代々木2-30-4",        lat:35.6858, lng:139.6997, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13006570/", gmap:"https://maps.google.com/maps/search/?api=1&query=ムーンボウ+東京都渋谷区代々木2-30-4"},
+  {id:8, name:"うどん 慎",            genre:"うどん",           address:"代々木2-20-16",       lat:35.6852, lng:139.7006, tabelog:"https://tabelog.com/tokyo/A1304/A130401/13125862/", gmap:"https://maps.google.com/maps/search/?api=1&query=うどん慎+東京都渋谷区代々木2-20-16"},
+  {id:9, name:"楢製麺",              genre:"うどん/ラーメン",  address:"代々木2-26-2",        lat:35.6857, lng:139.7001, tabelog:"https://tabelog.com/tokyo/A1304/A130401/13234984/", gmap:"https://maps.google.com/maps/search/?api=1&query=楢製麺+東京都渋谷区代々木2-26-2"},
+  {id:10,name:"伊之瀬",              genre:"つけ麺",           address:"代々木2-20-19",       lat:35.6853, lng:139.7007, tabelog:"https://tabelog.com/tokyo/A1304/A130401/13300048/", gmap:"https://maps.google.com/maps/search/?api=1&query=伊之瀬+東京都渋谷区代々木2-20-19"},
+  {id:11,name:"ライオンシェア",       genre:"カレー",           address:"代々木3-1-7",         lat:35.6838, lng:139.6974, tabelog:"https://tabelog.com/tokyo/A1318/A131810/13019617/", gmap:"https://maps.google.com/maps/search/?api=1&query=ライオンシェア+東京都渋谷区代々木3-1-7"},
+  {id:12,name:"BAKERY & BURGER JB'S TOKYO",genre:"ハンバーガー",address:"代々木1-33-3",   lat:35.6840, lng:139.7022, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13260771/", gmap:"https://maps.google.com/maps/search/?api=1&query=JBS+TOKYO+東京都渋谷区代々木1-33-3"},
+  {id:13,name:"らすた 代々木店",      genre:"ラーメン",         address:"代々木1-38-10",       lat:35.6835, lng:139.7022, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13019788/", gmap:"https://maps.google.com/maps/search/?api=1&query=らすた+東京都渋谷区代々木1-38-10"},
+  {id:14,name:"eggslut 新宿サザンテラス店",genre:"カフェ",      address:"代々木2-2-1",         lat:35.6862, lng:139.7025, tabelog:"https://tabelog.com/tokyo/A1304/A130401/13238359/", gmap:"https://maps.google.com/maps/search/?api=1&query=eggslut+新宿サザンテラス"},
+  {id:15,name:"GINGER GRASS",        genre:"タイ/ベトナム料理",address:"代々木2-2-1",          lat:35.6861, lng:139.7023, tabelog:"https://tabelog.com/tokyo/A1304/A130401/13223381/", gmap:"https://maps.google.com/maps/search/?api=1&query=GINGER+GRASS+小田急サザンタワー"},
+  {id:16,name:"アヒリヤ 代々木店",    genre:"インド料理",       address:"代々木1-34-3",        lat:35.6839, lng:139.7020, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13009222/", gmap:"https://maps.google.com/maps/search/?api=1&query=アヒリヤ+東京都渋谷区代々木1-34-3"},
+  {id:17,name:"でっかい餃子 代々木店", genre:"餃子/台湾料理",   address:"代々木1-33-2",        lat:35.6840, lng:139.7021, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13021680/", gmap:"https://maps.google.com/maps/search/?api=1&query=でっかい餃子+東京都渋谷区代々木1-33-2"},
+  {id:18,name:"グリーンスポット",     genre:"野菜料理/洋食",    address:"代々木1-21-12",       lat:35.6846, lng:139.7027, tabelog:"https://tabelog.com/tokyo/A1304/A130403/13013517/", gmap:"https://maps.google.com/maps/search/?api=1&query=グリーンスポット+東京都渋谷区代々木1-21-12"},
+];
+
+const map = L.map('map').setView([35.6862, 139.7030], 15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors', maxZoom: 19
+}).addTo(map);
+
+function makeIcon() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" width="24" height="32"><path d="M12 0C7.58 0 4 3.58 4 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8z" fill="#EDED70" stroke="#0F1F2E" stroke-width="1.5"/><circle cx="12" cy="8" r="3.5" fill="#0F1F2E"/></svg>`;
+  return L.divIcon({ html: svg, className:'', iconSize:[24,32], iconAnchor:[12,32], popupAnchor:[0,-32] });
+}
+
+const markers = {};
+restaurants.forEach(r => {
+  const marker = L.marker([r.lat, r.lng], {icon: makeIcon()}).addTo(map);
+  marker.bindPopup(`<div class="popup-name">${r.name}</div><div class="popup-genre">${r.genre}</div><div class="popup-address">${r.address}</div><div class="popup-links"><a href="${r.tabelog}" target="_blank">食べログ</a><a href="${r.gmap}" target="_blank">Googleマップ</a></div>`, {maxWidth:220});
+  markers[r.id] = marker;
+
+  const div = document.createElement('div');
+  div.className = 'shop-item';
+  div.innerHTML = `<div class="shop-name">${r.name}</div><div class="shop-meta"><span class="shop-genre">${r.genre}</span><span style="font-size:10px;color:#888">${r.address}</span></div><div class="shop-links"><a href="${r.tabelog}" target="_blank">食べログ</a><a href="${r.gmap}" target="_blank">地図</a></div>`;
+  div.addEventListener('click', e => {
+    if (e.target.tagName === 'A') return;
+    document.querySelectorAll('.shop-item').forEach(el => el.classList.remove('active'));
+    div.classList.add('active');
+    map.setView([r.lat, r.lng], 17);
+    markers[r.id].openPopup();
+  });
+  document.getElementById('list').appendChild(div);
+});
+</script>
+</body>
+</html>

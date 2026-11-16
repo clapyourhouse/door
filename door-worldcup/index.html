@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Door — W杯</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .screen {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .screen.hidden { display: none !important; }
+
+  /* BRAND */
+  .brand { font-size: 12px; letter-spacing: 4px; color: #555; text-transform: uppercase; }
+
+  /* LANDING */
+  .big-emoji { font-size: 56px; margin: 4px 0; }
+  .main-title { font-size: 26px; font-weight: 700; line-height: 1.4; }
+  .sub-text { font-size: 14px; color: #666; line-height: 1.6; }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    max-width: 320px;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn.primary { background: #fff; color: #000; }
+  .btn.secondary { background: #1a1a1a; color: #fff; border: 1px solid #333; }
+  .btn.danger { background: #e63946; color: #fff; }
+  .btn-link { background: none; border: none; color: #444; font-size: 13px; cursor: pointer; padding: 8px; }
+
+  /* GPS SCREEN */
+  .gps-ring {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    position: relative;
+  }
+  .gps-ring.scanning::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    animation: ripple 1.5s linear infinite;
+  }
+  @keyframes ripple {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  .stadium-badge {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #ccc;
+    max-width: 300px;
+  }
+
+  .stadium-badge .dist { font-size: 12px; color: #555; margin-top: 4px; }
+
+  /* MATCH LIST */
+  #match-screen {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+    gap: 0;
+  }
+
+  .screen-header {
+    padding: 20px 20px 12px;
+    border-bottom: 1px solid #1a1a1a;
+    flex-shrink: 0;
+  }
+  .screen-header h2 { font-size: 20px; font-weight: 700; }
+  .screen-header p { font-size: 13px; color: #555; margin-top: 4px; }
+
+  .match-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .match-card {
+    background: #141414; border: 1px solid #222; border-radius: 16px;
+    padding: 16px; cursor: pointer; transition: border-color 0.2s;
+  }
+  .match-card:active { border-color: #444; }
+
+  .match-meta { font-size: 11px; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+  .match-teams { display: flex; align-items: center; justify-content: space-between; }
+  .team { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .team-flag { font-size: 34px; }
+  .team-name { font-size: 13px; font-weight: 600; color: #bbb; }
+  .vs { font-size: 12px; color: #333; font-weight: 700; }
+
+  .match-foot {
+    margin-top: 10px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: #444;
+  }
+  .live-badge { background: #e63946; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 100px; }
+  .ended-badge { background: #1e1e1e; color: #555; font-size: 10px; padding: 3px 8px; border-radius: 100px; }
+
+  /* DOOR */
+  #door-screen { background: radial-gradient(ellipse at center, #0d1b2a 0%, #0a0a0a 70%); }
+
+  .match-pill {
+    background: #141414; border: 1px solid #222; border-radius: 100px;
+    padding: 8px 18px; font-size: 15px;
+  }
+
+  .filter-tabs {
+    display: flex; gap: 6px; background: #141414;
+    border: 1px solid #222; border-radius: 100px; padding: 4px;
+  }
+  .filter-tab {
+    padding: 8px 16px; border-radius: 100px; font-size: 13px;
+    cursor: pointer; border: none; background: transparent; color: #555; transition: all 0.2s;
+  }
+  .filter-tab.active { background: #fff; color: #000; font-weight: 700; }
+
+  .filter-note { font-size: 12px; color: #444; }
+
+  .door-wrap { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .door-svg { width: 150px; height: 230px; transition: filter 0.3s; }
+  .door-wrap:hover .door-svg { filter: drop-shadow(0 0 24px rgba(255,255,255,0.12)); }
+  .door-tap-hint { font-size: 13px; color: #444; }
+
+  /* MATCHING */
+  .pulse-ring {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px; animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.12); }
+    70% { box-shadow: 0 0 0 28px rgba(255,255,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  }
+
+  /* CHAT */
+  #chat-screen {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+    gap: 0;
+  }
+
+  .chat-header {
+    padding: 14px 18px; border-bottom: 1px solid #1a1a1a;
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: #1e1e1e; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .chat-header .info h3 { font-size: 15px; font-weight: 700; }
+  .chat-header .info p { font-size: 12px; color: #444; margin-top: 2px; }
+
+  .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+  .msg { max-width: 76%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.5; word-break: break-word; }
+  .msg.me { background: #fff; color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg.them { background: #1e1e1e; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg.system { background: transparent; color: #444; font-size: 12px; align-self: center; text-align: center; max-width: 90%; }
+
+  .chat-input-bar {
+    padding: 10px 14px; border-top: 1px solid #1a1a1a;
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1; min-width: 0; background: #1e1e1e; border: none;
+    border-radius: 100px; padding: 12px 16px; color: #fff; font-size: 15px; outline: none;
+  }
+  .chat-input::placeholder { color: #444; }
+  .send-btn {
+    width: 44px; height: 44px; flex-shrink: 0; background: #fff; border: none;
+    border-radius: 50%; color: #000; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* UPGRADE MODAL */
+  #upgrade-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 100;
+    align-items: flex-end; justify-content: center; padding: 16px;
+  }
+  #upgrade-modal.show { display: flex; }
+  .upgrade-card {
+    background: #141414; border: 1px solid #333; border-radius: 24px;
+    padding: 28px 24px; width: 100%; max-width: 420px; text-align: center;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .upgrade-card h3 { font-size: 22px; font-weight: 700; }
+  .upgrade-card p { font-size: 14px; color: #666; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing-screen" class="screen">
+  <div class="brand">Door</div>
+  <div class="big-emoji">⚽</div>
+  <h1 class="main-title">同じ試合を観た人と<br>扉が開く</h1>
+  <p class="sub-text">スタジアムの熱量が冷める前に、<br>まだ見ぬ誰かと繋がろう</p>
+  <button class="btn primary" onclick="startGPS()">扉を開く</button>
+  <p style="font-size:11px;color:#333;">自国サポーター無料 · 他国はPRO</p>
+</div>
+
+<!-- GPS -->
+<div id="gps-screen" class="screen hidden">
+  <div class="brand">Door</div>
+  <div class="gps-ring scanning" id="gps-ring">📍</div>
+  <h2 style="font-size:20px;font-weight:700;" id="gps-title">現在地を確認中...</h2>
+  <p class="sub-text" id="gps-desc">スタジアム周辺にいることを確認しています</p>
+  <div class="stadium-badge hidden" id="stadium-badge">
+    <div id="stadium-name"></div>
+    <div class="dist" id="stadium-dist"></div>
+  </div>
+  <button class="btn primary hidden" id="gps-next-btn" onclick="showMatchScreen()">試合を選ぶ →</button>
+  <button class="btn-link hidden" id="gps-retry-btn" onclick="startGPS()">再試行</button>
+  <!-- DEV: テスト用バイパス -->
+  <button class="btn-link" id="gps-skip-btn" onclick="skipGPS()" style="margin-top:8px;color:#333;">🛠 デモモードで続ける</button>
+</div>
+
+<!-- MATCH SELECT -->
+<div id="match-screen" class="screen hidden">
+  <div class="screen-header" style="width:100%;">
+    <h2>どの試合を観ましたか？</h2>
+    <p>観戦した試合を選ぶと扉が開きます</p>
+  </div>
+  <div class="match-list" id="match-list" style="width:100%;"></div>
+</div>
+
+<!-- DOOR -->
+<div id="door-screen" class="screen hidden" style="background:radial-gradient(ellipse at center,#0d1b2a 0%,#0a0a0a 70%);">
+  <div class="brand">Door</div>
+  <div class="match-pill" id="match-pill"></div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab active" id="tab-same" onclick="setFilter('same')">🇯🇵 日本人</button>
+    <button class="filter-tab" id="tab-other" onclick="setFilter('other')">🌍 他国 PRO</button>
+  </div>
+  <p class="filter-note" id="filter-note">同じ試合を観た日本人サポーターと繋がります</p>
+
+  <div class="door-wrap" onclick="openDoor()">
+    <svg class="door-svg" viewBox="0 0 150 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="8" width="134" height="214" rx="8" fill="#0f0f0f" stroke="#2a2a2a" stroke-width="1.5"/>
+      <rect x="18" y="18" width="114" height="194" rx="6" fill="#0a0a0a" stroke="#1e1e1e" stroke-width="1"/>
+      <circle cx="118" cy="120" r="5" fill="#2a2a2a"/>
+    </svg>
+    <p class="door-tap-hint">タップして扉を開く</p>
+  </div>
+
+  <button class="btn-link" onclick="show('match-screen');hide('door-screen')">← 試合を変える</button>
+</div>
+
+<!-- MATCHING -->
+<div id="matching-screen" class="screen hidden">
+  <div class="pulse-ring">🚪</div>
+  <h2 style="font-size:22px;font-weight:700;">扉を開いています...</h2>
+  <p class="sub-text">同じ試合を観た人を探しています</p>
+</div>
+
+<!-- CHAT -->
+<div id="chat-screen" class="screen hidden">
+  <div class="chat-header">
+    <div class="avatar" id="chat-avatar">🇯🇵</div>
+    <div class="info">
+      <h3 id="chat-name">---</h3>
+      <p id="chat-sub">---</p>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-bar">
+    <input class="chat-input" id="chat-input" type="text" placeholder="メッセージを送る..."
+      onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="send-btn" onclick="sendMsg()">↑</button>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div id="upgrade-modal">
+  <div class="upgrade-card">
+    <h3>🌍 他国サポーターと繋がる</h3>
+    <p>スペイン人・ブラジル人・ドイツ人…<br>同じ試合を観た世界中のサポーターと扉が開きます。<br>AIがリアルタイム翻訳。</p>
+    <button class="btn primary" onclick="goPro()">PRO — ¥500/月で始める</button>
+    <button class="btn secondary" onclick="closeUpgrade()">日本人と繋がる（無料）</button>
+    <button class="btn-link" onclick="closeUpgrade()">キャンセル</button>
+  </div>
+</div>
+
+<script>
+// ========== CONFIG ==========
+const OPENAI_KEY = 'YOUR_OPENAI_KEY_HERE'; // ← ここにキーを入れる
+
+// W杯2026 全会場
+const STADIUMS = [
+  { name: 'MetLife Stadium', city: 'ニューアーク, NJ', lat: 40.8135, lng: -74.0745 },
+  { name: 'AT&T Stadium', city: 'アーリントン, TX', lat: 32.7473, lng: -97.0945 },
+  { name: 'SoFi Stadium', city: 'イングルウッド, CA', lat: 33.9535, lng: -118.3392 },
+  { name: "Levi's Stadium", city: 'サンタクララ, CA', lat: 37.4033, lng: -121.9694 },
+  { name: 'Hard Rock Stadium', city: 'マイアミ, FL', lat: 25.9580, lng: -80.2389 },
+  { name: 'NRG Stadium', city: 'ヒューストン, TX', lat: 29.6847, lng: -95.4107 },
+  { name: 'Arrowhead Stadium', city: 'カンザスシティ, MO', lat: 39.0489, lng: -94.4839 },
+  { name: 'Empower Field', city: 'デンバー, CO', lat: 39.7439, lng: -105.0201 },
+  { name: 'Lincoln Financial Field', city: 'フィラデルフィア, PA', lat: 39.9008, lng: -75.1675 },
+  { name: 'Gillette Stadium', city: 'フォックスボロ, MA', lat: 42.0909, lng: -71.2643 },
+  { name: 'BC Place', city: 'バンクーバー, カナダ', lat: 49.2767, lng: -123.1118 },
+  { name: 'Estadio Azteca', city: 'メキシコシティ, メキシコ', lat: 19.3029, lng: -99.1505 },
+];
+
+const MATCHES = [
+  { id:1, group:'グループC', time:'6/12 21:00', teamA:'🇯🇵', nameA:'日本', teamB:'🇩🇪', nameB:'ドイツ', status:'live', viewers:2341 },
+  { id:2, group:'グループC', time:'6/12 21:00', teamA:'🇪🇸', nameA:'スペイン', teamB:'🇧🇷', nameB:'ブラジル', status:'live', viewers:5821 },
+  { id:3, group:'グループA', time:'6/11 18:00', teamA:'🇺🇸', nameA:'アメリカ', teamB:'🇲🇽', nameB:'メキシコ', status:'ended', viewers:1203 },
+  { id:4, group:'グループB', time:'6/11 21:00', teamA:'🇫🇷', nameA:'フランス', teamB:'🇦🇷', nameB:'アルゼンチン', status:'ended', viewers:3421 },
+  { id:5, group:'グループD', time:'6/10 18:00', teamA:'🇰🇷', nameA:'韓国', teamB:'🇵🇹', nameB:'ポルトガル', status:'ended', viewers:892 },
+];
+
+// ========== STATE ==========
+let selectedMatch = null;
+let filterMode = 'same';
+let nearestStadium = null;
+let chatHistory = [];
+let msgCount = 0;
+let greetId = 0;
+
+// ========== UTILS ==========
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+function showOnly(id) {
+  ['landing-screen','gps-screen','match-screen','door-screen','matching-screen','chat-screen']
+    .forEach(s => s === id ? show(s) : hide(s));
+}
+
+function distKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ========== GPS ==========
+function startGPS() {
+  showOnly('gps-screen');
+  document.getElementById('gps-ring').classList.add('scanning');
+  document.getElementById('gps-title').textContent = '現在地を確認中...';
+  document.getElementById('gps-desc').textContent = 'スタジアム周辺にいることを確認しています';
+  hide('stadium-badge'); hide('gps-next-btn'); hide('gps-retry-btn');
+
+  if (!navigator.geolocation) { gpsError('このブラウザはGPSに対応していません'); return; }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => gpsSuccess(pos.coords.latitude, pos.coords.longitude),
+    err => gpsError('位置情報の取得に失敗しました'),
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function gpsSuccess(lat, lng) {
+  document.getElementById('gps-ring').classList.remove('scanning');
+
+  // 最寄り会場を探す
+  let best = null, bestDist = Infinity;
+  STADIUMS.forEach(s => {
+    const d = distKm(lat, lng, s.lat, s.lng);
+    if (d < bestDist) { bestDist = d; best = s; }
+  });
+
+  nearestStadium = best;
+  const inRange = bestDist <= 2.0; // 2km以内
+
+  if (inRange) {
+    document.getElementById('gps-ring').textContent = '🏟️';
+    document.getElementById('gps-title').textContent = 'スタジアム確認！';
+    document.getElementById('gps-desc').textContent = '現地にいることが確認されました';
+    document.getElementById('stadium-name').textContent = `📍 ${best.name}`;
+    document.getElementById('stadium-dist').textContent = `${best.city} · ${bestDist.toFixed(1)}km以内`;
+    show('stadium-badge'); show('gps-next-btn'); hide('gps-retry-btn');
+  } else {
+    document.getElementById('gps-ring').textContent = '❌';
+    document.getElementById('gps-title').textContent = 'スタジアム外です';
+    document.getElementById('gps-desc').textContent = `最寄り会場まで ${bestDist.toFixed(0)}km\nW杯会場周辺からのみ利用できます`;
+    document.getElementById('stadium-name').textContent = `🏟 ${best.name}`;
+    document.getElementById('stadium-dist').textContent = `${best.city} · 約${bestDist.toFixed(0)}km`;
+    show('stadium-badge'); hide('gps-next-btn'); show('gps-retry-btn');
+  }
+}
+
+function gpsError(msg) {
+  document.getElementById('gps-ring').classList.remove('scanning');
+  document.getElementById('gps-ring').textContent = '⚠️';
+  document.getElementById('gps-title').textContent = 'GPSエラー';
+  document.getElementById('gps-desc').textContent = msg;
+  hide('gps-next-btn'); show('gps-retry-btn');
+}
+
+function skipGPS() {
+  // デモ用: MetLife Stadiumを仮の会場として設定
+  nearestStadium = STADIUMS[0];
+  showMatchScreen();
+}
+
+// ========== MATCH SELECT ==========
+function showMatchScreen() {
+  showOnly('match-screen');
+  const list = document.getElementById('match-list');
+  list.innerHTML = MATCHES.map(m => `
+    <div class="match-card" onclick="selectMatch(${m.id})">
+      <div class="match-meta">${m.group} · ${m.time}</div>
+      <div class="match-teams">
+        <div class="team">
+          <div class="team-flag">${m.teamA}</div>
+          <div class="team-name">${m.nameA}</div>
+        </div>
+        <div class="vs">VS</div>
+        <div class="team">
+          <div class="team-flag">${m.teamB}</div>
+          <div class="team-name">${m.nameB}</div>
+        </div>
+      </div>
+      <div class="match-foot">
+        ${m.status === 'live' ? '<span class="live-badge">● LIVE</span>' : '<span class="ended-badge">終了</span>'}
+        <span>🚪 ${m.viewers.toLocaleString()}人が扉を開いた</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectMatch(id) {
+  selectedMatch = MATCHES.find(m => m.id === id);
+  document.getElementById('match-pill').textContent =
+    `${selectedMatch.teamA} ${selectedMatch.nameA} vs ${selectedMatch.nameB} ${selectedMatch.teamB}`;
+  showOnly('door-screen');
+}
+
+// ========== FILTER ==========
+function setFilter(mode) {
+  if (mode === 'other') { document.getElementById('upgrade-modal').classList.add('show'); return; }
+  filterMode = mode;
+  document.getElementById('tab-same').classList.toggle('active', mode === 'same');
+  document.getElementById('tab-other').classList.toggle('active', mode === 'other');
+  document.getElementById('filter-note').textContent =
+    mode === 'same' ? '同じ試合を観た日本人サポーターと繋がります' : '世界中のサポーターと繋がります（AI翻訳付き）';
+}
+
+// ========== DOOR → MATCHING → CHAT ==========
+function openDoor() {
+  showOnly('matching-screen');
+  setTimeout(startChat, 2000 + Math.random()*800);
+}
+
+function startChat() {
+  const partners = [
+    { name: 'Taro_Osaka', flag: '🇯🇵', city: '大阪から現地遠征' },
+    { name: 'Kenji_FIFA', flag: '🇯🇵', city: 'W杯3大会連続参戦' },
+    { name: 'Yuki_Nagoya', flag: '🇯🇵', city: '名古屋から来ました' },
+  ];
+  const p = partners[Math.floor(Math.random() * partners.length)];
+  document.getElementById('chat-avatar').textContent = p.flag;
+  document.getElementById('chat-name').textContent = p.name;
+  document.getElementById('chat-sub').textContent = `${p.city} · 同じ試合を観ていました`;
+
+  chatHistory = [];
+  msgCount = 0;
+  document.getElementById('chat-messages').innerHTML = '';
+  showOnly('chat-screen');
+
+  addMsg('system', `🚪 扉が開きました — ${p.name}さんと繋がりました`);
+
+  const myGid = ++greetId;
+  const match = selectedMatch;
+  const systemPrompt = `あなたは「${p.name}」という日本人のW杯サポーターです。
+${match.nameA} vs ${match.nameB}の試合を同じスタジアムで観戦していました。
+試合の感想・雰囲気・プレイについて熱く語ってください。
+返答は1〜2文で短く、サポーターらしい熱量で。絵文字を自然に使って。`;
+
+  callAI(systemPrompt, '試合どうでしたか？').then(reply => {
+    if (greetId !== myGid) return;
+    setTimeout(() => addMsg('them', reply), 600);
+  });
+}
+
+// ========== SEND MESSAGE ==========
+async function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addMsg('me', text);
+  input.value = '';
+  msgCount++;
+
+  if (msgCount >= 5) {
+    setTimeout(() => document.getElementById('upgrade-modal').classList.add('show'), 500);
+    return;
+  }
+
+  chatHistory.push({ role: 'user', content: text });
+
+  const match = selectedMatch;
+  const systemPrompt = `あなたは日本人W杯サポーターです。${match.nameA} vs ${match.nameB}を同じスタジアムで観戦しました。
+試合の感想や雰囲気について自然に会話してください。返答は1〜2文で短く、サポーターらしい熱量で。絵文字を自然に使って。`;
+
+  const reply = await callAI(systemPrompt, null, chatHistory);
+  chatHistory.push({ role: 'assistant', content: reply });
+  addMsg('them', reply);
+}
+
+// ========== OPENAI ==========
+async function callAI(system, firstMsg, history = []) {
+  const messages = [{ role: 'system', content: system }];
+  if (firstMsg) messages.push({ role: 'user', content: firstMsg });
+  messages.push(...history);
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_KEY}` },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages, max_tokens: 100, temperature: 0.85 })
+    });
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || fallbackReply();
+  } catch {
+    return fallbackReply();
+  }
+}
+
+function fallbackReply() {
+  const r = ['めちゃ盛り上がりましたね！🔥', 'あのゴール最高でした！', '現地の雰囲気やばかった😭', '次の試合も行きますか？'];
+  return r[Math.floor(Math.random() * r.length)];
+}
+
+// ========== UTILS ==========
+function addMsg(type, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function goPro() {
+  closeUpgrade();
+  alert('PRO機能 — 近日公開予定');
+}
+
+function closeUpgrade() {
+  document.getElementById('upgrade-modal').classList.remove('show');
+}
+</script>
+</body>
+</html>
