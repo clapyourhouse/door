@@ -16,6 +16,7 @@ git worktree add --detach "$TMP/pages" origin/gh-pages >/dev/null
 mkdir -p "$TMP/pages/travel"
 cp app/www/app.js app/www/config.js app/www/style.css app/www/legal.css app/www/legal.js "$TMP/pages/travel/"
 cp app/www/privacy.html app/www/terms.html app/www/tokusho.html "$TMP/pages/travel/"
+cp app/www/og.png app/www/logo.svg app/www/favicon.png app/www/icon-192.png app/www/apple-touch-icon.png "$TMP/pages/travel/"
 # unlisted for now: ask search engines not to index
 sed 's#<head>#<head>\n<meta name="robots" content="noindex">#' app/www/index.html > "$TMP/pages/travel/index.html"
 
