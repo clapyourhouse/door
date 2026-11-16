@@ -318,6 +318,8 @@ html, body {
   padding: 14px 16px;
   background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
 }
+/* PC: チャットパネル(320px)に右上のボタン(EN・Street View)が隠れないよう、パネルの左に寄せる */
+@media (min-width: 641px) { #s-app:not(.chat-closed) .hud-top { right: 320px; } }
 .hud-left { display: flex; align-items: center; gap: 8px; }
 .hud-center { flex: 1; text-align: center; }
 .hud-logo { font-size: 11px; letter-spacing: 6px; color: rgba(255,255,255,0.3); }

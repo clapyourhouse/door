@@ -507,6 +507,7 @@ function openDoorAndLaunch() {
 function toggleChat() {
   const closed = get('chatPanel').classList.toggle('hidden');
   get('chatOpenBtn').classList.toggle('hidden', !closed);
+  get('s-app').classList.toggle('chat-closed', closed);
 }
 
 /* ---------- human handoff ---------- */
