@@ -144,30 +144,66 @@ const I18N = {
 
 // Local fallback so the app still works if the cities table cannot be read.
 const LOCAL_CITIES = [
-  { id: 'tokyo-shibuya', name_ja: '東京・渋谷', name_en: 'Tokyo · Shibuya', lat: 35.6595, lng: 139.7005,
-    intro_ja: '渋谷へようこそ。駅前のスクランブル交差点は、青信号のたびに大勢が一斉に渡ります。',
-    intro_en: 'Welcome to Shibuya. The famous scramble crossing in front of the station fills with people every time the light turns green.' },
-  { id: 'tokyo-asakusa', name_ja: '東京・浅草', name_en: 'Tokyo · Asakusa', lat: 35.7111, lng: 139.7964,
-    intro_ja: '浅草へようこそ。雷門から仲見世通りを抜けると浅草寺に着きます。',
-    intro_en: 'Welcome to Asakusa. Walk through Kaminarimon gate and down Nakamise street to reach Senso-ji temple.' },
-  { id: 'kyoto-gion', name_ja: '京都・祇園', name_en: 'Kyoto · Gion', lat: 35.0035, lng: 135.7751,
-    intro_ja: '京都の祇園へようこそ。このあたりでは町家が並ぶ通りを歩けます。',
-    intro_en: 'Welcome to Gion in Kyoto. Streets here are lined with traditional machiya townhouses.' },
-  { id: 'osaka-dotonbori', name_ja: '大阪・道頓堀', name_en: 'Osaka · Dotonbori', lat: 34.6687, lng: 135.5014,
-    intro_ja: '大阪の道頓堀へようこそ。戎橋の周りには看板が並び、川沿いも歩けます。',
-    intro_en: 'Welcome to Dotonbori in Osaka. Signs light up the area around Ebisu Bridge, and you can walk along the canal.' },
-  { id: 'sapporo-odori', name_ja: '北海道・札幌', name_en: 'Hokkaido · Sapporo', lat: 43.0605, lng: 141.3564,
-    intro_ja: '札幌へようこそ。大通公園の東端にはさっぽろテレビ塔があります。',
-    intro_en: 'Welcome to Sapporo. The Sapporo TV Tower stands at the east end of Odori Park.' },
-  { id: 'fukuoka-nakasu', name_ja: '福岡・中洲', name_en: 'Fukuoka · Nakasu', lat: 33.5917, lng: 130.4058,
-    intro_ja: '福岡の中洲へようこそ。那珂川沿いには夜になると屋台が並びます。',
-    intro_en: 'Welcome to Nakasu in Fukuoka. Food stalls (yatai) line the Naka River in the evening.' },
-  { id: 'hiroshima-peace-park', name_ja: '広島・平和記念公園', name_en: 'Hiroshima · Peace Memorial Park', lat: 34.3955, lng: 132.4536,
-    intro_ja: '広島の平和記念公園へようこそ。近くに原爆ドームがあります。',
-    intro_en: 'Welcome to Hiroshima Peace Memorial Park. The Atomic Bomb Dome is nearby.' },
-  { id: 'naha-kokusai-dori', name_ja: '沖縄・那覇 国際通り', name_en: 'Okinawa · Naha Kokusai-dori', lat: 26.2146, lng: 127.6859,
-    intro_ja: '那覇の国際通りへようこそ。お土産店や飲食店が並ぶ、にぎやかな通りです。',
-    intro_en: 'Welcome to Kokusai-dori in Naha, a lively street of souvenir shops and restaurants.' }
+  { id: "tokyo-shibuya", name_ja: "東京・渋谷", name_en: "Tokyo · Shibuya", lat: 35.65907020237839, lng: 139.7004739629136, pano_id: "C4Fb1Jo2Gc10WBB3W5_clQ",
+    intro_ja: "渋谷へようこそ。ここは駅前で、スクランブル交差点はすぐそばです。",
+    intro_en: "Welcome to Shibuya. You are in front of the station, right by the famous scramble crossing." },
+  { id: "tokyo-asakusa", name_ja: "東京・浅草", name_en: "Tokyo · Asakusa", lat: 35.7105738555828, lng: 139.7961864989535, pano_id: "bMrp7vpiNBWiu2zk8MxwMg",
+    intro_ja: "浅草へようこそ。雷門の近くです。仲見世通りを抜けると浅草寺に着きます。",
+    intro_en: "Welcome to Asakusa. You are near Kaminarimon gate. Walk down Nakamise street to reach Senso-ji temple." },
+  { id: "tokyo-shinjuku", name_ja: "東京・新宿 歌舞伎町", name_en: "Tokyo · Shinjuku Kabukicho", lat: 35.69419920827744, lng: 139.7032366469576, pano_id: "DwtausUYpqGP_dOImT2dFw",
+    intro_ja: "新宿の歌舞伎町のあたりへようこそ。飲食店やネオンの看板が並ぶ、夜もにぎやかな街です。",
+    intro_en: "Welcome to Kabukicho in Shinjuku. Restaurants and neon signs line the streets of this lively nightlife district." },
+  { id: "kamakura-komachi", name_ja: "神奈川・鎌倉 小町通り", name_en: "Kamakura · Komachi-dori", lat: 35.32001198776832, lng: 139.5517174684008, pano_id: "Si0Pg7v9DVz2hRNU54_ZPA",
+    intro_ja: "鎌倉の小町通りへようこそ。駅から鶴岡八幡宮の方へ続く、食べ歩きの人気の通りです。",
+    intro_en: "Welcome to Komachi-dori in Kamakura, a popular snack street leading from the station toward Tsurugaoka Hachimangu shrine." },
+  { id: "kyoto-gion", name_ja: "京都・祇園", name_en: "Kyoto · Gion", lat: 35.0032216786772, lng: 135.7750014353892, pano_id: "8Yx_sgJixW821xV2H9vbrg",
+    intro_ja: "京都の祇園へようこそ。このあたりでは町家が並ぶ通りを歩けます。",
+    intro_en: "Welcome to Gion in Kyoto. Streets here are lined with traditional machiya townhouses." },
+  { id: "kyoto-fushimi", name_ja: "京都・伏見稲荷大社周辺", name_en: "Kyoto · Near Fushimi Inari Shrine", lat: 34.96757459517679, lng: 135.7723004213781, pano_id: "qVKWd1UxQZk9HUNWlEPC0w",
+    intro_ja: "京都の伏見稲荷の近くへようこそ。千本鳥居で知られる神社は、すぐそばです。",
+    intro_en: "Welcome to the area near Fushimi Inari Shrine in Kyoto, famous for its thousands of red torii gates." },
+  { id: "osaka-dotonbori", name_ja: "大阪・道頓堀", name_en: "Osaka · Dotonbori", lat: 34.66872487244701, lng: 135.5010233904262, pano_id: "2XQNY3SSxlFwcnrxbJwDHQ",
+    intro_ja: "大阪の道頓堀へようこそ。看板が並び、食べ歩きの店が続くにぎやかなエリアです。",
+    intro_en: "Welcome to Dotonbori in Osaka, a lively area of bright signs and street food." },
+  { id: "osaka-castle", name_ja: "大阪・大阪城", name_en: "Osaka · Osaka Castle", lat: 34.68730367922188, lng: 135.5254540681785, pano_id: "0Bi781Owm_K6R2ANWYX3yg",
+    intro_ja: "大阪城へようこそ。天守閣を中心に、広い公園になっています。",
+    intro_en: "Welcome to Osaka Castle. The main keep stands in the middle of a large park." },
+  { id: "nara-park", name_ja: "奈良・奈良公園", name_en: "Nara · Nara Park", lat: 34.68509732059267, lng: 135.842646007272, pano_id: "zjLqYYoxlNJyTZ_n21UNvw",
+    intro_ja: "奈良公園へようこそ。鹿が自由に歩く広い公園で、東大寺や春日大社が近くにあります。",
+    intro_en: "Welcome to Nara Park, a large park where deer roam freely. Todai-ji and Kasuga Taisha are nearby." },
+  { id: "kobe-motomachi", name_ja: "兵庫・神戸 元町", name_en: "Kobe · Motomachi", lat: 34.68904301401889, lng: 135.1890776200576, pano_id: "kkZjbgbQZbsK1VYc1C6QAg",
+    intro_ja: "神戸の元町へようこそ。商店街が続き、南京町（中華街）も近くです。",
+    intro_en: "Welcome to Motomachi in Kobe, a long shopping district close to Nankinmachi, the Chinese quarter." },
+  { id: "kanazawa-kenroku", name_ja: "石川・金沢 兼六園", name_en: "Kanazawa · Kenrokuen Garden", lat: 36.56210779579367, lng: 136.6626976262752, pano_id: "MnQLP_6LQMT5HkqPfr-BcA",
+    intro_ja: "金沢の兼六園へようこそ。日本三名園の一つで、季節ごとの景色が楽しめます。",
+    intro_en: "Welcome to Kenrokuen in Kanazawa, counted as one of the three great gardens of Japan, beautiful in every season." },
+  { id: "kanazawa-higashi", name_ja: "石川・金沢 ひがし茶屋街", name_en: "Kanazawa · Higashi Chaya District", lat: 36.57275038949604, lng: 136.6655809556834, pano_id: "tLkC03y0a2Nff3AYex3aNA",
+    intro_ja: "金沢のひがし茶屋街へようこそ。古い茶屋の町並みが残る、石畳の通りです。",
+    intro_en: "Welcome to the Higashi Chaya district in Kanazawa, with preserved old teahouse streets." },
+  { id: "kurashiki-bikan", name_ja: "岡山・倉敷 美観地区", name_en: "Okayama · Kurashiki Bikan District", lat: 34.59635597415637, lng: 133.7725461466362, pano_id: "AkSj9C-2h05__eSVqkBOTA",
+    intro_ja: "倉敷の美観地区へようこそ。白壁の蔵や、柳が並ぶ運河沿いの町並みです。",
+    intro_en: "Welcome to the Bikan Historical Quarter in Kurashiki, with white-walled storehouses and a willow-lined canal." },
+  { id: "hiroshima-peace-park", name_ja: "広島・原爆ドーム", name_en: "Hiroshima · Atomic Bomb Dome", lat: 34.39549744186948, lng: 132.4535920961856, pano_id: "UK9I8gZuBrx0DzOSUJLDIA",
+    intro_ja: "広島の原爆ドームへようこそ。すぐ近くに平和記念公園があります。",
+    intro_en: "Welcome to the Atomic Bomb Dome in Hiroshima. Peace Memorial Park is right next to it." },
+  { id: "miyajima", name_ja: "広島・宮島", name_en: "Hiroshima · Miyajima", lat: 34.29554261065283, lng: 132.3204272940036, pano_id: "O2ZB5OFlT5jscs_55U5Zlg",
+    intro_ja: "宮島へようこそ。海に立つ大鳥居で知られる、厳島神社の島です。",
+    intro_en: "Welcome to Miyajima, the island of Itsukushima Shrine and its famous torii gate standing in the sea." },
+  { id: "sapporo-odori", name_ja: "北海道・札幌 時計台周辺", name_en: "Hokkaido · Sapporo Clock Tower area", lat: 43.06212993371935, lng: 141.3533078185712, pano_id: "5VJ4k55aSrVy4ePP1TdW9Q",
+    intro_ja: "札幌へようこそ。ここは時計台の近くで、大通公園は南へ歩いてすぐです。",
+    intro_en: "Welcome to Sapporo. You are near the Clock Tower, and Odori Park is a short walk south." },
+  { id: "fukuoka-tenjin", name_ja: "福岡・天神", name_en: "Fukuoka · Tenjin", lat: 33.59098774822968, lng: 130.3989574990601, pano_id: "I-H-ik_RTk82urI6ZXB42g",
+    intro_ja: "福岡の天神へようこそ。九州でも指折りの繁華街で、地下街やショッピングビルが並びます。",
+    intro_en: "Welcome to Tenjin in Fukuoka, one of Kyushu's biggest shopping and dining districts." },
+  { id: "dazaifu", name_ja: "福岡・太宰府", name_en: "Fukuoka · Dazaifu", lat: 33.52139218519632, lng: 130.5345120031818, pano_id: "D_UeKBRx67erd2EjI0d8Jw",
+    intro_ja: "太宰府へようこそ。学問の神様をまつる太宰府天満宮への参道のあたりです。",
+    intro_en: "Welcome to Dazaifu, near the approach to Dazaifu Tenmangu, the shrine of the god of learning." },
+  { id: "kumamoto-castle", name_ja: "熊本・熊本城", name_en: "Kumamoto · Kumamoto Castle", lat: 32.80631391252409, lng: 130.7054145646807, pano_id: "A2-jeXP34B-MGrqF0vdr0w",
+    intro_ja: "熊本城へようこそ。石垣の大きな城で、復旧の工事が続く場所もあります。",
+    intro_en: "Welcome to Kumamoto Castle, known for its tall stone walls. Some areas are still being restored." },
+  { id: "naha-kokusai-dori", name_ja: "沖縄・那覇 牧志市場", name_en: "Okinawa · Naha Makishi Market", lat: 26.21495936361764, lng: 127.6887845996086, pano_id: "vHQGtjLfI_GyfPE8CAVR-A",
+    intro_ja: "那覇の牧志市場のあたりへようこそ。国際通りのすぐ近くの、屋根のある商店街です。",
+    intro_en: "Welcome to the Makishi Market area in Naha, a covered shopping arcade right next to Kokusai-dori." }
 ];
 
 const get = id => document.getElementById(id);
@@ -433,10 +469,10 @@ function nextDoor(forceCity, restored) {
   humanMode = false;
   history = restored ? restored.slice() : [];
   renderCityHeader();
-  get('mapsLink').href = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + encodeURIComponent(current.lat + ',' + current.lng);
+  get('mapsLink').href = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + encodeURIComponent(current.lat + ',' + current.lng) + (current.pano_id ? '&pano=' + encodeURIComponent(current.pano_id) : '');
   get('svLoading').classList.add('hidden');
   if (CFG.mapsEmbedKey) {
-    const params = new URLSearchParams({ key: CFG.mapsEmbedKey, location: current.lat + ',' + current.lng });
+    const params = new URLSearchParams(current.pano_id ? { key: CFG.mapsEmbedKey, pano: current.pano_id } : { key: CFG.mapsEmbedKey, location: current.lat + ',' + current.lng });
     get('sv-iframe').src = 'https://www.google.com/maps/embed/v1/streetview?' + params;
   } else {
     get('sv-iframe').removeAttribute('src');
