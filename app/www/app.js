@@ -10,6 +10,8 @@ const REF_KEY = 'door.ref.v1';
 const FIRST_KEY = 'door.first.v1';
 const SURVEY_KEY = 'door.survey.v1';
 const AIOK_KEY = 'door.aiok.v1';
+const RESUME_KEY = 'door.resume.v1'; // 決済ページへ行く前の「街と会話」。戻ったときに続きから再開する
+const PAID_KEY = 'door.paidAt.v1';
 
 const I18N = {
   ja: {
@@ -39,7 +41,7 @@ const I18N = {
     paywall: '無料のAI質問は終わりました。7日間パス（¥980）を準備中です。AIへの質問が1日100回まで、日本の担当者への質問も1日3回までできるようになります。',
     paywallBuy: '無料のAI質問は終わりました。7日間パス（¥980）なら、AIへの質問が1日100回まで、日本の担当者への質問も1日3回までできます。',
     buy: '7日パスを購入する（¥980）',
-    buyThanks: 'ご購入ありがとうございます。パスはこのブラウザに紐づきます。反映まで数秒かかることがあります。',
+    buyThanks: 'ご購入ありがとうございます。続きから質問できます。パスはこのブラウザに紐づきます。',
     interest: '7日パスに興味あり',
     interestThanks: 'ありがとうございます。購入できるようになったらお知らせします。',
     dailyLimit: '今日のAI質問の上限に達しました。明日また使えます。',
@@ -100,7 +102,7 @@ const I18N = {
     paywall: 'Your free AI questions are used up. A 7-day pass ($6.99) is coming soon: up to 100 AI questions a day and up to 3 questions a day to our team in Japan.',
     paywallBuy: 'Your free AI questions are used up. With a 7-day pass ($6.99) you get up to 100 AI questions a day and up to 3 questions a day to our team in Japan.',
     buy: 'Get the 7-day pass ($6.99)',
-    buyThanks: 'Thank you for your purchase. The pass is tied to this browser. It may take a few seconds to apply.',
+    buyThanks: 'Thank you for your purchase. You can pick up where you left off. The pass is tied to this browser.',
     interest: "I'm interested in the 7-day pass",
     interestThanks: "Thank you. We'll let you know when it is available.",
     dailyLimit: "You've reached today's AI question limit. Come back tomorrow.",
@@ -362,7 +364,11 @@ function paywallMessage() {
     btn.onclick = async () => {
       btn.disabled = true;
       track('buy_click');
-      try { window.location.assign(await buildCheckoutUrl()); }
+      try {
+        const url = await buildCheckoutUrl();
+        if (current) store.set(RESUME_KEY, { city: current.id, history: history.slice(-8), ts: Date.now() });
+        window.location.assign(url);
+      }
       catch (e) { btn.disabled = false; message(() => t().errGeneric, 'sys'); }
     };
   } else {
@@ -416,12 +422,12 @@ async function submitSurvey() {
 }
 
 /* ---------- navigation ---------- */
-function nextDoor() {
+function nextDoor(forceCity, restored) {
   const others = cities.filter(c => !current || c.id !== current.id);
   const pool = others.length ? others : cities; // only one active city: stay put
-  current = pool[Math.floor(Math.random() * pool.length)];
+  current = forceCity || pool[Math.floor(Math.random() * pool.length)];
   humanMode = false;
-  history = [];
+  history = restored ? restored.slice() : [];
   renderCityHeader();
   get('mapsLink').href = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + encodeURIComponent(current.lat + ',' + current.lng);
   get('svLoading').classList.add('hidden');
@@ -439,6 +445,7 @@ function nextDoor() {
   applyLang();
   const here = current;
   message(() => cityIntro(here) + ' ' + t().hello);
+  history.forEach(h => message(h.content, h.role === 'user' ? 'me' : undefined));
   if (!CFG.mapsEmbedKey) message(() => t().svMissing, 'sys');
   if (justPaid) { message(() => t().buyThanks, 'sys'); justPaid = false; }
 }
@@ -603,7 +610,13 @@ async function askAi(question) {
     noteAiAnswer();
     return;
   }
-  const r = await authed('/functions/v1/chat', { method: 'POST', body: JSON.stringify({ city_id: current.id, lang, messages: history }) });
+  const callChat = () => authed('/functions/v1/chat', { method: 'POST', body: JSON.stringify({ city_id: current.id, lang, messages: history }) });
+  let r = await callChat();
+  // 支払い直後は、支払い完了の通知(webhook)が数秒遅れることがある。少し待って、数回やり直す
+  for (let i = 0; i < 4 && !r.ok && r.data && r.data.error === 'free_limit' && Date.now() - (Number(store.get(PAID_KEY)) || 0) < 120000; i++) {
+    await new Promise(res => setTimeout(res, 2500));
+    r = await callChat();
+  }
   if (r.ok && r.data && r.data.reply) {
     const parts = splitPlaces(r.data.reply);
     history.push({ role: 'assistant', content: parts.text });
@@ -642,6 +655,24 @@ async function sendMessage() {
 }
 
 /* ---------- boot ---------- */
+// 支払いから戻ったら、扉の画面を飛ばして、さっきの街・会話の続きから再開する（1時間以内）
+function resumeAfterPayment() {
+  if (!justPaid) return;
+  const r = store.get(RESUME_KEY);
+  store.set(RESUME_KEY, null);
+  if (!r || !r.city || Date.now() - (Number(r.ts) || 0) > 3600000) return; // 別のブラウザ等：通常どおり扉から
+  const city = cities.find(c => c.id === r.city);
+  if (!city) return;
+  opening = true;
+  const app = get('s-app');
+  app.classList.remove('gone');
+  app.classList.add('visible');
+  app.style.display = 'flex';
+  get('s-landing').classList.add('gone');
+  nextDoor(city, Array.isArray(r.history) ? r.history.filter(h => h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string') : []);
+  startPolling();
+}
+
 function history_replace() {
   const u = new URL(location.href);
   u.searchParams.delete('paid');
@@ -656,10 +687,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const q = new URLSearchParams(location.search);
   if (q.get('paid') === '1') {
     justPaid = true;
+    store.set(PAID_KEY, Date.now());
     try { history_replace(); } catch (e) { /* ignore */ }
   }
   applyLang();
-  loadCities();
+  loadCities().then(resumeAfterPayment);
   loadStaff();
   if (!DEMO) ensureSession().then(() => { track('land_view'); if (justPaid) track('pass_return'); pollReplies(); }).catch(() => {});
 });
