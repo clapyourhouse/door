@@ -221,7 +221,7 @@ let history = []; // {role, content} for the current city
 let quota = { kind: 'free', left: DEMO ? DEMO_FREE_LIMIT : null };
 const langParam = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
 let lang = (langParam === 'ja' || langParam === 'en') ? langParam
-  : (store.get(LANG_KEY) || ((navigator.language || 'en').toLowerCase().startsWith('ja') ? 'ja' : 'en'));
+  : (store.get(LANG_KEY) || 'en'); // 標準言語は英語（訪日向け・2026-11-16 決定）。?lang=ja か、画面のEN/JA切替で日本語
 let demoFreeUsed = 0;
 let pollTimer = null;
 let tick = 0;
