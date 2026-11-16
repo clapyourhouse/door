@@ -562,6 +562,31 @@ function noteAiAnswer() {
   if (aiOk >= 3) maybeSurvey(1500);
 }
 
+// AIが付けた [PLACE: 店名] を、Googleマップ検索のリンクに変える（座標は使わない＝誤った場所へ飛ばない）
+function splitPlaces(reply) {
+  const names = [];
+  const text = String(reply).replace(/\[\s*PLACE\s*:\s*([^\]\n]{1,80}?)\s*\]/gi, (_, n) => {
+    if (names.length < 3 && names.indexOf(n) === -1) names.push(n);
+    return '';
+  }).replace(/\n{3,}/g, '\n\n').trim();
+  return { text, names };
+}
+function placeLinks(names) {
+  if (!names.length || !current) return null;
+  const wrap = document.createElement('div');
+  wrap.className = 'place-links';
+  names.forEach(n => {
+    const a = document.createElement('a');
+    a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(n + ' ' + cityName(current));
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = '📍 ' + n + ' →';
+    a.addEventListener('click', () => track('place_link'));
+    wrap.append(a);
+  });
+  return wrap;
+}
+
 async function askAi(question) {
   history.push({ role: 'user', content: question });
   if (!store.get(FIRST_KEY)) { store.set(FIRST_KEY, 1); track('first_question'); }
@@ -579,11 +604,12 @@ async function askAi(question) {
   }
   const r = await authed('/functions/v1/chat', { method: 'POST', body: JSON.stringify({ city_id: current.id, lang, messages: history }) });
   if (r.ok && r.data && r.data.reply) {
-    history.push({ role: 'assistant', content: r.data.reply });
+    const parts = splitPlaces(r.data.reply);
+    history.push({ role: 'assistant', content: parts.text });
     if (r.data.mode === 'pass') quota = { kind: 'pass', left: r.data.daily_remaining };
     else quota = { kind: 'free', left: r.data.free_remaining };
     renderQuota();
-    message(r.data.reply);
+    message(parts.text, undefined, placeLinks(parts.names));
     noteAiAnswer();
     return;
   }
