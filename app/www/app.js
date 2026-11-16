@@ -631,7 +631,7 @@ function placeLinks(items) {
       a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(it.name);
       a.textContent = '🔍 ' + it.name + (lang === 'en' ? ' · search on Google Maps →' : '（Googleマップで探す）→');
     } else {
-      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&destination=' + encodeURIComponent(it.name + ' ' + cityName(current));
+      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&travelmode=transit&destination=' + encodeURIComponent(it.name + ' ' + cityName(current));
       a.textContent = '📍 ' + it.name + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
     }
     a.target = '_blank';
