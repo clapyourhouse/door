@@ -1005,7 +1005,10 @@ button.hud-btn { font-family:inherit; }
   .sv-overlay .coords { display: none; }
   .sv-overlay .country { font-size: 13px; margin-bottom: 2px; }
   .sv-overlay .local-time { font-size: 10px; margin-top: 2px; }
-  #s-app.drawer-open .sv-overlay { bottom: calc(38dvh + 8px + var(--kb, 0px)); }
+  /* Phone: end the street view above the chat drawer so the move arrows are not covered,
+     and drop the place label (the chat header already names the place). */
+  #s-app.drawer-open #sv-iframe { bottom: calc(38dvh + var(--kb, 0px)) !important; height: auto !important; }
+  #s-app.drawer-open .sv-overlay { display: none; }
   .chat-panel-header { padding: 4px 14px 6px; gap: 8px; }
   .chat-panel-header::before { margin-bottom: 6px; }
   .chat-panel .avatar { width: 28px; height: 28px; min-width: 28px; font-size: 14px; }
