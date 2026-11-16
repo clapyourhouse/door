@@ -623,6 +623,31 @@ function splitPlaces(reply) {
   return { text, items };
 }
 // 店名が確かなもの＝扉の場所からの経路／確かでないもの＝Googleマップの検索（座標は使わない）
+// 店リンクの目的地に添える「行政の住所（都道府県＋市区）」。同名の別の店との取り違えを減らす（2026-11-16）。
+// 無い地点は、従来どおり地点名を使う（影響なし）。
+const AREA = {
+  'tokyo-shibuya': ['東京都渋谷区', 'Shibuya City, Tokyo'],
+  'tokyo-asakusa': ['東京都台東区', 'Taito City, Tokyo'],
+  'tokyo-shinjuku': ['東京都新宿区', 'Shinjuku City, Tokyo'],
+  'kamakura-komachi': ['神奈川県鎌倉市', 'Kamakura, Kanagawa'],
+  'kyoto-gion': ['京都府京都市東山区', 'Higashiyama Ward, Kyoto'],
+  'kyoto-fushimi': ['京都府京都市伏見区', 'Fushimi Ward, Kyoto'],
+  'osaka-dotonbori': ['大阪府大阪市中央区', 'Chuo Ward, Osaka'],
+  'osaka-castle': ['大阪府大阪市中央区', 'Chuo Ward, Osaka'],
+  'nara-park': ['奈良県奈良市', 'Nara City, Nara'],
+  'kobe-motomachi': ['兵庫県神戸市中央区', 'Chuo Ward, Kobe, Hyogo'],
+  'kanazawa-kenroku': ['石川県金沢市', 'Kanazawa, Ishikawa'],
+  'kanazawa-higashi': ['石川県金沢市', 'Kanazawa, Ishikawa'],
+  'kurashiki-bikan': ['岡山県倉敷市', 'Kurashiki, Okayama'],
+  'hiroshima-peace-park': ['広島県広島市中区', 'Naka Ward, Hiroshima'],
+  'miyajima': ['広島県廿日市市宮島町', 'Miyajima, Hatsukaichi, Hiroshima'],
+  'sapporo-odori': ['北海道札幌市中央区', 'Chuo Ward, Sapporo, Hokkaido'],
+  'fukuoka-tenjin': ['福岡県福岡市中央区', 'Chuo Ward, Fukuoka'],
+  'dazaifu': ['福岡県太宰府市', 'Dazaifu, Fukuoka'],
+  'kumamoto-castle': ['熊本県熊本市中央区', 'Chuo Ward, Kumamoto'],
+  'naha-kokusai-dori': ['沖縄県那覇市', 'Naha, Okinawa']
+};
+const areaText = c => (AREA[c.id] ? AREA[c.id][lang === 'ja' ? 0 : 1] : cityName(c));
 function placeLinks(items) {
   if (!items.length || !current) return null;
   const wrap = document.createElement('div');
@@ -633,7 +658,7 @@ function placeLinks(items) {
       a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(it.name);
       a.textContent = '🔍 ' + it.name + (lang === 'en' ? ' · search on Google Maps →' : '（Googleマップで探す）→');
     } else {
-      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&travelmode=transit&destination=' + encodeURIComponent(it.name + ' ' + cityName(current));
+      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&travelmode=transit&destination=' + encodeURIComponent(it.name + ' ' + areaText(current));
       a.textContent = '📍 ' + it.name + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
     }
     a.target = '_blank';
