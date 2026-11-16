@@ -614,8 +614,8 @@ function noteAiAnswer() {
 function splitPlaces(reply) {
   const items = [];
   const text = String(reply).replace(/\[\s*(PLACE|SEARCH)\s*:\s*([^\]\n]{1,80}?)\s*\]/gi, (_, kind, n) => {
-    const k = kind.toUpperCase() === 'SEARCH' ? 'search' : 'place';
-    if (items.length < 3 && !items.some(x => x.name === n)) items.push({ kind: k, name: n });
+    // SEARCHタグは文字だけ消す（検索リンクは出さない＝2026-11-16 方針変更。結果の地域が不確かなため）
+    if (kind.toUpperCase() === 'PLACE' && items.length < 3 && !items.some(x => x.name === n)) items.push({ kind: 'place', name: n });
     return '';
   }).replace(/\n{3,}/g, '\n\n').trim();
   return { text, items };
@@ -631,7 +631,7 @@ function placeLinks(items) {
       a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(it.name);
       a.textContent = '🔍 ' + it.name + (lang === 'en' ? ' · search on Google Maps →' : '（Googleマップで探す）→');
     } else {
-      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&destination=' + encodeURIComponent(it.name + ' ' + cityName(current));
+      a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&travelmode=transit&destination=' + encodeURIComponent(it.name + ' ' + cityName(current));
       a.textContent = '📍 ' + it.name + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
     }
     a.target = '_blank';
