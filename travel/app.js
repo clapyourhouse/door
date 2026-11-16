@@ -1,6 +1,6 @@
 'use strict';
 
-const CFG = Object.assign({ supabaseUrl: '', supabaseAnonKey: '', mapsEmbedKey: '', stripePaymentLink: '' }, window.DOOR_CONFIG || {});
+const CFG = Object.assign({ supabaseUrl: '', supabaseAnonKey: '', mapsEmbedKey: '', stripePaymentLink: '', stripePaymentLinkEn: '' }, window.DOOR_CONFIG || {});
 const DEMO = !CFG.supabaseUrl || !CFG.supabaseAnonKey;
 const DEMO_FREE_LIMIT = 5;
 const SESSION_KEY = 'door.session.v1';
@@ -280,7 +280,7 @@ async function loadStaff() {
 
 async function buildCheckoutUrl() {
   const s = await ensureSession();
-  const u = new URL(CFG.stripePaymentLink);
+  const u = new URL((lang === 'en' && CFG.stripePaymentLinkEn) || CFG.stripePaymentLink);
   u.searchParams.set('client_reference_id', s.user_id);
   return u.toString();
 }
