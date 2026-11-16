@@ -616,13 +616,14 @@ function noteAiAnswer() {
 function splitPlaces(reply) {
   const items = [];
   const text = String(reply).replace(/\[\s*(PLACE|SEARCH)\s*:\s*([^\]\n]{1,80}?)\s*\]/gi, (_, kind, n) => {
-    // SEARCHタグは文字だけ消す（検索リンクは出さない＝2026-11-16 方針変更。結果の地域が不確かなため）
-    if (kind.toUpperCase() === 'PLACE' && items.length < 3 && !items.some(x => x.name === n)) items.push({ kind: 'place', name: n });
+    // PLACE＝名所（扉の場所からの経路）／SEARCH＝飲食店など（扉の近くで探す）。合計3つまで
+    const k = kind.toUpperCase() === 'SEARCH' ? 'search' : 'place';
+    if (items.length < 3 && !items.some(x => x.name === n)) items.push({ kind: k, name: n });
     return '';
   }).replace(/\n{3,}/g, '\n\n').trim();
   return { text, items };
 }
-// 店名が確かなもの＝扉の場所からの経路／確かでないもの＝Googleマップの検索（座標は使わない）
+// 名所＝扉の場所からの経路／飲食店など＝扉の近くでGoogleマップ検索
 // 店リンクの目的地に添える「行政の住所（都道府県＋市区）」。同名の別の店との取り違えを減らす（2026-11-16）。
 // 無い地点は、従来どおり地点名を使う（影響なし）。
 const AREA = {
@@ -655,8 +656,9 @@ function placeLinks(items) {
   items.forEach(it => {
     const a = document.createElement('a');
     if (it.kind === 'search') {
-      a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(it.name);
-      a.textContent = '🔍 ' + it.name + (lang === 'en' ? ' · search on Google Maps →' : '（Googleマップで探す）→');
+      // 地図の中心を扉の場所に置いて探す（地名だけの検索だと、遠くの同名の店が出るため）
+      a.href = 'https://www.google.com/maps/search/' + encodeURIComponent(it.name) + '/@' + current.lat + ',' + current.lng + ',15z';
+      a.textContent = '🔍 ' + it.name + (lang === 'en' ? ' · search near here →' : '（この近くで探す）→');
     } else {
       a.href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(current.lat + ',' + current.lng) + '&travelmode=transit&destination=' + encodeURIComponent(it.name + ' ' + areaText(current));
       a.textContent = '📍 ' + it.name + (lang === 'en' ? ' · directions from here →' : '（ここから行き方）→');
