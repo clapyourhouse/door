@@ -308,6 +308,8 @@ function renderStaff() {
   if (!el) return;
   el.className = 'staff ' + (staffOnline ? 'on' : 'off');
   el.textContent = staffOnline ? t().staffOnline : t().staffOffline;
+  // 担当者の状態は「人に聞く」を押したときだけ表示（スマホでチャット欄を広く使うため・2026-11-16 決定）
+  if (el.parentElement) el.parentElement.style.display = humanMode ? '' : 'none';
 }
 
 async function loadStaff() {
