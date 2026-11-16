@@ -155,3 +155,4 @@
 ### 2026-11-16 全体図(鳥瞰図)
 - Whiteboard「Door Travel 全体図」を作成(https://claude.ai/artifact/PdPzm2NXqCa7CujkyNXikn)。登場人物(旅行者・運営者・アプリ・Supabase[DB/匿名ログイン/関数]・OpenAI・Stripe・Googleマップ・GitHub/Mac・Gmail通知)と、将来(Android版・Doorシリーズ)を1枚に。凡例は青=稼働中、桃=これから・未実施、白=人。
 - 状態: 作成済み(目視は未確認)。「今は→今後」の変化の説明(Doorシリーズの共通部分と個別部分)は、まだ描いていない。
+- **2026-11-16 全体図の修正(本人の指摘)**: 構想の「Doorシリーズ」は Door Trip を含む。アプリは Android版に加えて iOS版も予定(同一コード、Capacitor)。DBのテーブルは9つ(cities, usage, passes, handoffs, pass_interest, events, feedback, staff_status, stripe_events)。Door Trip の中身は、本ドキュメントに記載がなく**未確認**。
