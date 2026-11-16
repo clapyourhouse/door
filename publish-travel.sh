@@ -19,6 +19,14 @@ cp app/www/privacy.html app/www/terms.html app/www/tokusho.html "$TMP/pages/trav
 cp app/www/og.png app/www/logo.svg app/www/favicon.png app/www/icon-192.png app/www/apple-touch-icon.png "$TMP/pages/travel/"
 # unlisted for now: ask search engines not to index
 sed 's#<head>#<head>\n<meta name="robots" content="noindex">#' app/www/index.html > "$TMP/pages/travel/index.html"
+# cache busting: a new version number on every publish, so browsers never keep an old app.js / config.js
+VER="$(date +%Y%m%d%H%M%S)"
+sed -i.bak "s#src=\"config.js\"#src=\"config.js?v=$VER\"#; s#src=\"app.js\"#src=\"app.js?v=$VER\"#" "$TMP/pages/travel/index.html"
+rm -f "$TMP/pages/travel/index.html.bak"
+for f in privacy terms tokusho; do
+  sed -i.bak "s#href=\"legal.css\"#href=\"legal.css?v=$VER\"#; s#src=\"legal.js\"#src=\"legal.js?v=$VER\"#" "$TMP/pages/travel/$f.html"
+  rm -f "$TMP/pages/travel/$f.html.bak"
+done
 
 cd "$TMP/pages"
 git add travel
