@@ -777,17 +777,28 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 Object.assign(window, { openDoorAndLaunch, nextDoor, goNext, arrive, toggleChat, sendMessage, toggleHuman, toggleLang, pollReplies, submitSurvey, closeSurvey, toggleSvEmail, onChatKey, buildCheckoutUrl, loadStaff, CFG });
 
-// Phones: keep the chat drawer above the on-screen keyboard and stop the page from drifting.
+// Phones: keep the chat drawer (and its input) above the on-screen keyboard and stop the page from drifting.
+// --kb is first estimated from the visual viewport, then corrected by measuring where the drawer really ends,
+// because in-app browsers on iOS do not always report the keyboard height the same way.
 (function () {
   const vv = window.visualViewport;
   if (!vv) return;
-  const sync = () => {
-    const kb = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
-    document.documentElement.style.setProperty('--kb', kb + 'px');
-    if (kb > 0) window.scrollTo(0, 0);
+  const root = document.documentElement;
+  const fit = () => {
+    const kb0 = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    root.style.setProperty('--kb', kb0 + 'px');
+    const typing = document.activeElement && document.activeElement.id === 'chatInput';
+    if (kb0 > 0 || typing) window.scrollTo(0, 0);
+    const panel = document.getElementById('chatPanel');
+    if (!typing || !panel || window.innerWidth > 640) return;
+    const over = Math.round(panel.getBoundingClientRect().bottom - (vv.offsetTop + vv.height));
+    if (over > 2) root.style.setProperty('--kb', (kb0 + over) + 'px');
   };
-  vv.addEventListener('resize', sync);
-  vv.addEventListener('scroll', sync);
+  const settle = () => { [0, 120, 350, 700].forEach(ms => setTimeout(fit, ms)); };
+  vv.addEventListener('resize', fit);
+  vv.addEventListener('scroll', fit);
+  document.addEventListener('focusin', e => { if (e.target && e.target.id === 'chatInput') settle(); });
+  document.addEventListener('focusout', e => { if (e.target && e.target.id === 'chatInput') settle(); });
 })();
 
 /* Phone: swipe down on (or tap) the chat header to close it. Also stops the browser's pull-to-refresh from reloading the app. */
