@@ -563,7 +563,7 @@ function toggleChat() {
 function toggleHuman() {
   humanMode = !humanMode;
   applyLang();
-  if (humanMode) { loadStaff(); message(() => t().humanHint, 'sys'); get('chatInput').focus(); }
+  if (humanMode) { if (isMobile()) setDrawer(true); loadStaff(); message(() => t().humanHint, 'sys'); get('chatInput').focus(); }
 }
 
 async function sendToHuman(question) {
@@ -758,7 +758,9 @@ function history_replace() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  get('chatPanel').querySelector('.chat-panel-header').addEventListener('click', () => {
+  get('chatPanel').querySelector('.chat-panel-header').addEventListener('click', (e) => {
+    // 見出しの中のボタン（人に聞く・✕）を押したときは、チャット欄を開閉しない（2026-11-17 不具合修正）
+    if (e.target.closest && e.target.closest('button, a')) return;
     if (isMobile()) setDrawer(!get('chatPanel').classList.contains('open'));
   });
   refInfo = captureRef();
