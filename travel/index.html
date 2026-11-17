@@ -1009,6 +1009,8 @@ button.hud-btn { font-family:inherit; }
   /* Phone: end the street view above the chat drawer so the move arrows are not covered,
      and drop the place label (the chat header already names the place). */
   #s-app.drawer-open #sv-iframe { bottom: auto !important; height: calc(100dvh - 38dvh - var(--kb, 0px)) !important; }
+  /* While the chat drawer is still fading in (arrival animation), keep the view full height so no black band shows. */
+  #s-app.chat-arriving #sv-iframe { height: 100% !important; }
   #s-app.drawer-open .sv-overlay { display: none; }
   .chat-panel-header { padding: 4px 14px 6px; gap: 8px; }
   .chat-panel-header::before { margin-bottom: 6px; }
@@ -1149,7 +1151,7 @@ button.hud-btn { font-family:inherit; }
   </div>
 </div>
 
-<script src="config.js?v=20261117185306"></script>
-<script src="app.js?v=20261117185306"></script>
+<script src="config.js?v=20261117185709"></script>
+<script src="app.js?v=20261117185709"></script>
 </body>
 </html>
