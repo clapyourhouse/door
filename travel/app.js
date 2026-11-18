@@ -494,7 +494,6 @@ function nextDoor(forceCity, restored) {
 
 /* 着地の演出。delayMs：光や扉が消え始めるまでの待ち時間（初回のみ長い） */
 let arriveTimer = null;
-let arrivingTimer = null;
 function arrive(delayMs, first) {
   const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !current) return;
@@ -513,9 +512,6 @@ function arrive(delayMs, first) {
   hud.forEach(el => el.classList.add('arrive-in'));
   // 連打したとき、前回のタイマーが今回の演出を消さないようにする
   clearTimeout(arriveTimer);
-  clearTimeout(arrivingTimer);
-  get('s-app').classList.add('chat-arriving');
-  arrivingTimer = setTimeout(() => get('s-app').classList.remove('chat-arriving'), delayMs + 900 + 950);
   arriveTimer = setTimeout(() => { [frame, arr, ...hud].forEach(el => el.classList.remove('focus-pull', 'show', 'arrive-in')); }, delayMs + 4500);
 }
 function goNext() { nextDoor(); arrive(0, false); }
